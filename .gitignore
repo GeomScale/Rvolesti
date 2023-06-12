@@ -1,0 +1,10 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+src/*.o
+src/external/lpsolve/build/lp_solve/*.o
+src/RcppExports.cpp
+src/*.so
+src/*.dll
+volesti.Rproj

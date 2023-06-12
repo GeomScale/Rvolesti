@@ -1,0 +1,32 @@
+{
+    "args": [
+        "-std=gnu++17",
+        "-ID:/Softwares/R/R-4.3.0/include",
+        "-DNDEBUG",
+        "-Iexternal",
+        "-Iexternal/lpsolve/headers/run_headers",
+        "-Iexternal/minimum_ellipsoid",
+        "-Iinclude",
+        "-Iinclude/convex_bodies/spectrahedra",
+        "-DBOOST_NO_AUTO_PTR",
+        "-ID:/Softwares/R/R-4.3.0/library/Rcpp/include",
+        "-ID:/Softwares/R/R-4.3.0/library/RcppEigen/include",
+        "-ID:/Softwares/R/R-4.3.0/library/BH/include",
+        "-DEIGEN_DONT_VECTORIZE",
+        "-nostdinc",
+        "-Id:/softwares/rtools/rtools43/x86_64-w64-mingw32.static.posix/bin/../lib/gcc/x86_64-w64-mingw32.static.posix/12.2.0/include/c++",
+        "-Id:/softwares/rtools/rtools43/x86_64-w64-mingw32.static.posix/bin/../lib/gcc/x86_64-w64-mingw32.static.posix/12.2.0/include/c++/x86_64-w64-mingw32.static.posix",
+        "-Id:/softwares/rtools/rtools43/x86_64-w64-mingw32.static.posix/bin/../lib/gcc/x86_64-w64-mingw32.static.posix/12.2.0/include/c++/backward",
+        "-Id:/softwares/rtools/rtools43/x86_64-w64-mingw32.static.posix/bin/../lib/gcc/x86_64-w64-mingw32.static.posix/12.2.0/include",
+        "-Id:/softwares/rtools/rtools43/x86_64-w64-mingw32.static.posix/bin/../lib/gcc/x86_64-w64-mingw32.static.posix/12.2.0/../../../../include",
+        "-Id:/softwares/rtools/rtools43/x86_64-w64-mingw32.static.posix/bin/../lib/gcc/x86_64-w64-mingw32.static.posix/12.2.0/include-fixed",
+        "-include",
+        "D:/Personal_Projects/GeomScale/Codebase/Forked_Volesti_R/.Rproj.user/CF1601EC/compilation-database/mingw64/cpp-definitions.h"
+    ],
+    "pch": "RcppEigen",
+    "is_cpp": true,
+    "hash": "168658961116865896111686589611",
+    "compiler": "6762244524107556826",
+    "rversion": "4.3.0",
+    "dbversion": 4
+}
