@@ -1,4 +1,0 @@
-[submodule "src/include"]
-	path = src/include
-	url = https://github.com/Soumya624/volesti.git
-	branch = contentsOfInclude
