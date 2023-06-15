@@ -13,9 +13,10 @@ The `volesti` package provides [R](https://www.r-project.org/) with functions fo
 To use the development version of `volesti` that includes the C++ code, you need to clone the repository and fetch the submodule. Follow these steps:
 
 * Clone the main `Rvolesti` repository.
-* Change into the volesti directory:
+* Change into `include` directory inside `src`:
 ```
-cd volesti
+cd src
+cd include
 ```
 * Fetch the submodule from the repository https://github.com/Soumya624/volesti:
 ```
