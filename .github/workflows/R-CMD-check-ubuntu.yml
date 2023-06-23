@@ -32,7 +32,8 @@ jobs:
       - name: Install dependencies
         run: |
           Rscript -e "install.packages(c('devtools', 'RcppEigen', 'BH', 'testthat', 'downloader', 'xfun'), dependencies = TRUE)"
-          Rscript -e "install.packages('rcmdcheck', repos = 'https://cloud.r-project.org')"
+          Rscript -e "install.packages('remotes')"
+          Rscript -e "remotes::install_github('r-lib/rcmdcheck')"
 
       - name: Check
         run: Rscript -e "library(rcmdcheck)" -e "rcmdcheck::rcmdcheck(args = c('--no-manual', '--no-install'), error_on = 'warning')"
