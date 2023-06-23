@@ -1,3 +1,11 @@
+##############################################################################
+# GitHub Actions Workflow to test the R interface of volesti
+#
+# Copyright (c) 2020 Vissarion Fisikopoulos
+#
+# Licensed under GNU LGPL.3, see LICENCE file
+##############################################################################
+
 on: [push, pull_request]
 
 name: R-CMD-check-macOS
@@ -30,11 +38,12 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@v2
 
       - name: Install dependencies
-        run: |
-          Rscript -e "install.packages(c('devtools', 'rcmdcheck', 'RcppEigen', 'BH', 'testthat', 'downloader', 'xfun'), dependencies = TRUE)"
+        run: Rscript -e "install.packages(c('devtools', dependencies=TRUE))" -e "install.packages(c('rcmdcheck', 'devtools', 'Rcpp', 'RcppEigen', 'BH', 'testthat', 'downloader', 'xfun'))";
 
       - name: Check
-        run: Rscript -e "library(rcmdcheck)" -e "rcmdcheck::rcmdcheck(args = c('--no-manual', '--no-install'), error_on = 'warning')"
+        env:
+          _R_CHECK_CRAN_INCOMING_REMOTE_: false
+        run: Rscript -e "library(rcmdcheck)" -e "rcmdcheck::rcmdcheck(args = c('--no-manual', '--no-install'), error_on = 'warning', check_dir = 'check')"
 
       - name: Upload check results
         if: failure()
