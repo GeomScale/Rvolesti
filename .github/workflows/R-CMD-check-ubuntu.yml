@@ -16,7 +16,7 @@ jobs:
           - {r: 'release'}
 
     env:
-      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - uses: actions/checkout@v3
@@ -29,11 +29,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          Rscript -e "install.packages(c('devtools', 'RcppEigen', 'BH', 'testthat', 'downloader', 'xfun'), dependencies = TRUE)"
+          Rscript -e "install.packages(c('RcppEigen', 'BH', 'testthat', 'downloader', 'xfun'), dependencies = TRUE)"
 
       - name: Check
         run: |
-          Rscript -e "devtools::check(args = c('--no-manual'))"
+          R CMD build .
+          R CMD check *tar.gz --no-manual
 
       - name: Upload check results
         if: failure()
