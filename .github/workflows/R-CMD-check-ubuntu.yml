@@ -17,7 +17,6 @@ jobs:
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - uses: actions/checkout@v3
@@ -32,18 +31,9 @@ jobs:
         run: |
           Rscript -e "install.packages(c('devtools', 'RcppEigen', 'BH', 'testthat', 'downloader', 'xfun'), dependencies = TRUE)"
 
-      - name: Download rcmdcheck
-        run: |
-          Rscript -e "download.file('https://github.com/r-lib/rcmdcheck/archive/refs/heads/master.zip', destfile = 'rcmdcheck.zip')"
-          Rscript -e "unzip('rcmdcheck.zip')"
-
-      - name: Install rcmdcheck
-        run: |
-          Rscript -e "install.packages('rcmdcheck', repos = NULL, type = 'source', INSTALL_opts = '--no-test-load', lib = '.')"
-
       - name: Check
         run: |
-          Rscript -e "library(rcmdcheck)" -e "rcmdcheck::rcmdcheck(args = c('--no-manual', '--no-install'), error_on = 'warning')"
+          Rscript -e "devtools::check(args = c('--no-manual'))"
 
       - name: Upload check results
         if: failure()
