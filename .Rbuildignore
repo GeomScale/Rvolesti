@@ -1,2 +1,5 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+src/external/lpsolve/
 .github/
 LICENSE
