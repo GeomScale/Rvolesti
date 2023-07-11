@@ -35,14 +35,26 @@ The package-dependencies are: `Rcpp`, `RcppEigen`, `BH`.
 * [Wikipage with Tutorials and Demos](https://github.com/GeomScale/volesti/wiki)
 * [Tutorial given to PyData meetup](https://vissarion.github.io/tutorials/volesti_tutorial_pydata.html)
 
+## How to update the volesti R package
+
+The C++ source code is retrieved from [volesti](https://github.com/GeomScale/volesti) package and placed in `src/include` of the current repository. To update the current C++ code we have to follow two steps:
+
+- Update the `cran_include` branch in [volesti](https://github.com/GeomScale/volesti) (this can be done by opening a PR, e.g. https://github.com/GeomScale/volesti/pull/277)
+- Retrieve the new `include` directory using submodule
+```
+git submodule update --recursive --init --remote
+```
+
+*Note:* it is possible the this update will brake the R interface, thus this operation should be processed with care. 
 
 ## Credits
 
 * [Contributors and Package History](https://github.com/GeomScale/volesti/blob/v1.1.1/doc/credits.md)
 * [List of Publications](https://github.com/GeomScale/volesti/blob/v1.1.1/doc/publications.md)
 
-Copyright (c) 2012-2020 Vissarion Fisikopoulos
-Copyright (c) 2018-2020 Apostolos Chalkis
+Copyright (c) 2012-2023 Vissarion Fisikopoulos
+
+Copyright (c) 2018-2023 Apostolos Chalkis
 
 You may redistribute or modify the software under the GNU Lesser General Public License as published by Free Software Foundation, either version 3 of the License, or (at your option) any later version. It is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY.
 
