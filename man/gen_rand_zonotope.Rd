@@ -4,22 +4,16 @@
 \alias{gen_rand_zonotope}
 \title{Generator function for zonotopes}
 \usage{
-gen_rand_zonotope(
-  dimension,
-  nsegments,
-  generator = list(distribution = "uniform")
-)
+gen_rand_zonotope(dimension, nsegments, generator = NULL, seed = NULL)
 }
 \arguments{
 \item{dimension}{The dimension of the zonotope.}
 
 \item{nsegments}{The number of segments that generate the zonotope.}
 
-\item{generator}{A list that could contain two elements.
-\itemize{
-\item{distribution }{  the distribution to pick the length of each segment from \eqn{[0,100]}: (i) 'uniform', (ii) 'gaussian' or (iii) 'exponential', the default value is 'uniform.}
-\item {seed }{ Optional. A fixed seed for the number generator.}
-}}
+\item{generator}{The distribution to pick the length of each segment from \eqn{[0,100]}: (a) 'uniform', (b) 'gaussian' or (c) 'exponential'.}
+
+\item{seed}{Optional. A fixed seed for the generator.}
 }
 \value{
 A polytope class representing a zonotope.
