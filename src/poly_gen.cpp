@@ -2,10 +2,11 @@
 
 // VolEsti (volume computation and sampling library)
 
-// Copyright (c) 20012-2018 Vissarion Fisikopoulos
+// Copyright (c) 2012-2018 Vissarion Fisikopoulos
 // Copyright (c) 2018 Apostolos Chalkis
 
 //Contributed and/or modified by Apostolos Chalkis, as part of Google Summer of Code 2018 program.
+
 
 #include <Rcpp.h>
 #include <RcppEigen.h>
@@ -48,17 +49,17 @@ Rcpp::NumericMatrix poly_gen (int kind_gen, bool Vpoly_gen, bool Zono_gen, int d
     typedef VPolytope <Point> Vpolytope;
     typedef Zonotope <Point> zonotope;
 
-    double seed2 = (!seed.isNotNull()) ? std::numeric_limits<double>::signaling_NaN() : Rcpp::as<double>(seed);
+    double seed_rcpp = (!seed.isNotNull()) ? std::numeric_limits<double>::signaling_NaN() : Rcpp::as<double>(seed);
 
     if (Zono_gen) {
         switch (kind_gen) {
 
             case 1:
-                return extractMatPoly(gen_zonotope_uniform<zonotope, RNGType>(dim_gen, m_gen, seed2));
+                return extractMatPoly(gen_zonotope_uniform<zonotope, RNGType>(dim_gen, m_gen, seed_rcpp));
             case 2:
-                return extractMatPoly(gen_zonotope_gaussian<zonotope, RNGType>(dim_gen, m_gen, seed2));
+                return extractMatPoly(gen_zonotope_gaussian<zonotope, RNGType>(dim_gen, m_gen, seed_rcpp));
             case 3:
-                return extractMatPoly(gen_zonotope_exponential<zonotope, RNGType>(dim_gen, m_gen, seed2));
+                return extractMatPoly(gen_zonotope_exponential<zonotope, RNGType>(dim_gen, m_gen, seed_rcpp));
 
         }
 
@@ -66,46 +67,48 @@ Rcpp::NumericMatrix poly_gen (int kind_gen, bool Vpoly_gen, bool Zono_gen, int d
         switch (kind_gen) {
 
             case 1:
-                return extractMatPoly(gen_cube<Vpolytope>(dim_gen, true));
+                return extractMatPoly(generate_cube<Vpolytope>(dim_gen, true));
 
             case 2:
-                return extractMatPoly(gen_cross<Vpolytope>(dim_gen, true));
+                return extractMatPoly(generate_cross<Vpolytope>(dim_gen, true));
 
             case 3:
-                return extractMatPoly(gen_simplex<Vpolytope>(dim_gen, true));
+                return extractMatPoly(generate_simplex<Vpolytope>(dim_gen, true));
 
             case 4:
-                return extractMatPoly(random_vpoly<Vpolytope, RNGType>(dim_gen, m_gen, seed2));
+                return extractMatPoly(random_vpoly<Vpolytope, RNGType>(dim_gen, m_gen, seed_rcpp));
 
             case 5:
-                return extractMatPoly(random_vpoly_incube<Vpolytope, RNGType>(dim_gen, m_gen, seed2));
+                return extractMatPoly(random_vpoly_incube<Vpolytope, RNGType>(dim_gen, m_gen, seed_rcpp));
 
         }
     } else {
         switch (kind_gen) {
 
             case 1:
-                return extractMatPoly(gen_cube<Hpolytope>(dim_gen, false));
+                return extractMatPoly(generate_cube<Hpolytope>(dim_gen, false));
 
             case 2:
-                return extractMatPoly(gen_cross<Hpolytope>(dim_gen, false));
+                return extractMatPoly(generate_cross<Hpolytope>(dim_gen, false));
 
             case 3:
-                return extractMatPoly(gen_simplex<Hpolytope>(dim_gen, false));
+                return extractMatPoly(generate_simplex<Hpolytope>(dim_gen, false));
 
             case 4:
-                return extractMatPoly(gen_prod_simplex<Hpolytope>(dim_gen));
+                return extractMatPoly(generate_prod_simplex<Hpolytope>(dim_gen));
 
             case 5:
-                return extractMatPoly(gen_skinny_cube<Hpolytope>(dim_gen));
+                return extractMatPoly(generate_skinny_cube<Hpolytope>(dim_gen));
 
             case 6:
-                return extractMatPoly(random_hpoly<Hpolytope, RNGType>(dim_gen, m_gen, seed2));
-                
+                return extractMatPoly(random_hpoly<Hpolytope, RNGType>(dim_gen, m_gen, seed_rcpp));
+            
             case 7:
-                return extractMatPoly(random_hpoly_ball<Hpolytope, RNGType>(dim_gen, m_gen, seed2));
+                return extractMatPoly(generate_birkhoff<Hpolytope>(dim_gen));
+
         }
     }
 
     throw Rcpp::exception("Wrong inputs!");
+
 }
