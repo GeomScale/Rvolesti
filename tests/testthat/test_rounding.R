@@ -5,17 +5,17 @@ library(volesti)
 testRound <- function(P, exactvol, tol, name_string, num_of_exps, algo, rotation,seed){
   
   if (rotation) {
-    P = rotate_polytope(P)$P
-    listHpoly = round_polytope(P, settings = list("seed" = seed))
+    P = rand_rotate(P)
+    listHpoly = round_polytope(P, seed = seed)
   } else {
-    listHpoly = round_polytope(P, settings = list("seed" = seed))
+    listHpoly = round_polytope(P, seed = seed)
   }
   vol = 0
   for (j in 1:num_of_exps) {
     if (algo == "CB") {
-      vol = vol + listHpoly$round_value * volume(listHpoly$P, settings=list("algorithm"="CB", "error"=0.1, "seed" = seed))
+      vol = vol + listHpoly$round_value * volume(listHpoly$P, seed = seed)$volume
     } else {
-      vol = vol + listHpoly$round_value * volume(listHpoly$P, settings=list("algorithm"="CG", "error"=0.1, "seed" = seed))
+      vol = vol + listHpoly$round_value * volume(listHpoly$P, settings=list("algorithm"="CG", "error"=0.1), seed = seed)$volume
     }
   }
   vol = vol / num_of_exps

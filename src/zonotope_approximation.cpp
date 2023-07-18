@@ -2,8 +2,9 @@
 
 // VolEsti (volume computation and sampling library)
 
-// Copyright (c) 20012-2018 Vissarion Fisikopoulos
+// Copyright (c) 2012-2018 Vissarion Fisikopoulos
 // Copyright (c) 2018 Apostolos Chalkis
+
 
 #include <Rcpp.h>
 #include <RcppEigen.h>
@@ -41,38 +42,29 @@ Rcpp::List zono_approx (Rcpp::Reference Z,
     typedef Zonotope <Point> zonotope;
     typedef Eigen::Matrix<NT, Eigen::Dynamic, 1> VT;
     typedef Eigen::Matrix <NT, Eigen::Dynamic, Eigen::Dynamic> MT;
-    int n, k = Rcpp::as<MT>(Z.slot("G")).rows(), win_len = 250, walkL = 1;
-
-    std::string type = Rcpp::as<std::string>(Z.slot("type"));
-
-    if (type.compare(std::string("Zonotope")) == 0) {
-        n = Rcpp::as<MT>(Z.slot("G")).cols();
-    } else {
-        throw Rcpp::exception("This is not a zonotope.");
-    }
+    int n = Rcpp::as<int>(Z.field("dimension")), k = Rcpp::as<MT>(Z.field("G")).rows(), win_len = 200, walkL = 1;
 
     RNGType rng(n);
     if (seed.isNotNull()) {
-        unsigned seed2 = Rcpp::as<double>(seed);
-        rng.set_seed(seed2);
+        unsigned seed_rcpp = Rcpp::as<double>(seed);
+        rng.set_seed(seed_rcpp);
     }
 
-    NT e = 0.1, ratio = std::numeric_limits<double>::signaling_NaN();;
+    NT e = 0.1, ratio = std::numeric_limits<double>::signaling_NaN();
     bool hpoly = false;
 
     MT X(n, 2 * k);
-    X << Rcpp::as<MT>(Z.slot("G")).transpose(), -Rcpp::as<MT>(Z.slot("G")).transpose();
+    X << Rcpp::as<MT>(Z.field("G")).transpose(), -Rcpp::as<MT>(Z.field("G")).transpose();
     Eigen::JacobiSVD <MT> svd(X * X.transpose(), Eigen::ComputeFullU | Eigen::ComputeFullV);
     MT G(k, 2 * n);
-    G << Rcpp::as<MT>(Z.slot("G")) * svd.matrixU(), Rcpp::as<MT>(Z.slot("G")) * svd.matrixU();
+    G << Rcpp::as<MT>(Z.field("G")) * svd.matrixU(), Rcpp::as<MT>(Z.field("G")) * svd.matrixU();
     VT Gred_ii = G.transpose().cwiseAbs().rowwise().sum();
     MT A(n, 2 * n);
     A << -MT::Identity(n, n), MT::Identity(n, n);
     MT Mat(2 * n, n + 1);
     Mat << Gred_ii, A.transpose() * svd.matrixU().transpose();
 
-    Hpolytope HP;
-    HP.init(n, A.transpose() * svd.matrixU().transpose(), Gred_ii);
+    //Hpolytope HP(n, A.transpose() * svd.matrixU().transpose(), Gred_ii);
 
     if (fit_ratio.isNotNull() && Rcpp::as<bool>(fit_ratio)) {
         NT vol_red = std::abs(svd.matrixU().determinant());
@@ -87,8 +79,7 @@ Rcpp::List zono_approx (Rcpp::Reference Z,
         win_len = (!Rcpp::as<Rcpp::List>(settings).containsElementNamed("win_len")) ? 200 : Rcpp::as<int>(
                 Rcpp::as<Rcpp::List>(settings)["win_len"]);
 
-        zonotope ZP;
-        ZP.init(n, Rcpp::as<MT>(Z.slot("G")), VT::Ones(Rcpp::as<MT>(Z.slot("G")).rows()));
+        zonotope ZP(n, Rcpp::as<MT>(Z.field("G")), VT::Ones(Rcpp::as<MT>(Z.field("G")).rows()));
 
         if (Rcpp::as<Rcpp::List>(settings).containsElementNamed("hpoly")) {
             hpoly = Rcpp::as<bool>(Rcpp::as<Rcpp::List>(settings)["hpoly"]);
@@ -100,7 +91,7 @@ Rcpp::List zono_approx (Rcpp::Reference Z,
 
         NT vol;
         if (!hpoly) {
-            vol = volume_cooling_balls<BilliardWalk>(ZP, rng, e, walkL, win_len);
+            vol = volume_cooling_balls<BilliardWalk>(ZP, rng, e, walkL, win_len).second;
         } else {
             vol = volume_cooling_hpoly<BilliardWalk, Hpolytope>(ZP, rng, e, walkL, win_len);
         }

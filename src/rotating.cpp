@@ -2,10 +2,11 @@
 
 // VolEsti (volume computation and sampling library)
 
-// Copyright (c) 20012-2018 Vissarion Fisikopoulos
+// Copyright (c) 2012-2018 Vissarion Fisikopoulos
 // Copyright (c) 2018 Apostolos Chalkis
 
 //Contributed and/or modified by Apostolos Chalkis, as part of Google Summer of Code 2018 program.
+
 
 #include <Rcpp.h>
 #include <RcppEigen.h>
@@ -45,65 +46,45 @@ Rcpp::NumericMatrix rotating (Rcpp::Reference P, Rcpp::Nullable<Rcpp::NumericMat
 
     MT TransorfMat;
     Rcpp::NumericMatrix Mat;
-    unsigned int n, type_num;
+    unsigned int n = P.field("dimension"), type = P.field("type");
 
-    std::string type = Rcpp::as<std::string>(P.slot("type"));
-
-    if (type.compare(std::string("Hpolytope")) == 0) {
-        n = Rcpp::as<MT>(P.slot("A")).cols();
-        type_num = 1;
-    } else if (type.compare(std::string("Vpolytope")) == 0) {
-        n = Rcpp::as<MT>(P.slot("V")).cols();
-        type_num = 2;
-    } else if (type.compare(std::string("Zonotope")) == 0) {
-        n = Rcpp::as<MT>(P.slot("G")).cols();
-        type_num = 3;
-    } else if (type.compare(std::string("VpolytopeIntersection")) == 0) {
-        throw Rcpp::exception("volesti does not support roatation of this kind of representation.");
-    } else {
-        throw Rcpp::exception("Unknown polytope representation!");
-    }
-
-    int seed2 = (!seed.isNotNull()) ? std::chrono::system_clock::now()
+    int seed_rcpp = (!seed.isNotNull()) ? std::chrono::system_clock::now()
                                       .time_since_epoch().count()
                                     : Rcpp::as<int>(seed);
 
-    switch (type_num) {
+    switch (type) {
         case 1: {
             // Hpolytope
-            Hpolytope HP;
-            HP.init(n, Rcpp::as<MT>(P.slot("A")), Rcpp::as<VT>(P.slot("b")));
+            Hpolytope HP(n, Rcpp::as<MT>(P.field("A")), Rcpp::as<VT>(P.field("b")));
             if (T.isNotNull()) {
                 TransorfMat = Rcpp::as<MT>(T);
                 HP.linear_transformIt(TransorfMat.inverse());
             } else {
-                TransorfMat = rotating < MT > (HP, seed2);
+                TransorfMat = rotating < MT > (HP, seed_rcpp);
             }
             Mat = extractMatPoly(HP);
             break;
         }
         case 2: {
             // Vpolytope
-            Vpolytope VP;
-            VP.init(n, Rcpp::as<MT>(P.slot("V")), VT::Ones(Rcpp::as<MT>(P.slot("V")).rows()));
+            Vpolytope VP(n, Rcpp::as<MT>(P.field("V")), VT::Ones(Rcpp::as<MT>(P.field("V")).rows()));
             if (T.isNotNull()) {
                 TransorfMat = Rcpp::as<MT>(T);
                 VP.linear_transformIt(TransorfMat.inverse());
             } else {
-                TransorfMat = rotating < MT > (VP, seed2);
+                TransorfMat = rotating < MT > (VP, seed_rcpp);
             }
             Mat = extractMatPoly(VP);
             break;
         }
         case 3: {
             // Zonotope
-            zonotope ZP;
-            ZP.init(n, Rcpp::as<MT>(P.slot("G")), VT::Ones(Rcpp::as<MT>(P.slot("G")).rows()));
+            zonotope ZP(n, Rcpp::as<MT>(P.field("G")), VT::Ones(Rcpp::as<MT>(P.field("G")).rows()));
             if (T.isNotNull()) {
                 TransorfMat = Rcpp::as<MT>(T);
                 ZP.linear_transformIt(TransorfMat.inverse());
             } else {
-                TransorfMat = rotating < MT > (ZP, seed2);
+                TransorfMat = rotating < MT > (ZP, seed_rcpp);
             }
             Mat = extractMatPoly(ZP);
             break;
