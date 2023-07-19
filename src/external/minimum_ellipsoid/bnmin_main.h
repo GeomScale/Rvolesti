@@ -1,6 +1,6 @@
 // VolEsti (volume computation and sampling library)
 
-// Copyright (c) 20012-2018 Vissarion Fisikopoulos
+// Copyright (c) 2012-2018 Vissarion Fisikopoulos
 // Copyright (c) 2018 Apostolos Chalkis
 
 // This file is converted from BNMin1 (https://www.mrao.cam.ac.uk/~bn204/oof/bnmin1.html) by Apostolos Chalkis
@@ -8,7 +8,7 @@
 // Original copyright notice:
 
 /**
-   Bojan Nikolic <bojan@bnikolic.co.uk> 
+   Bojan Nikolic <bojan@bnikolic.co.uk>
    Initial version 2008
 
    This file is part of BNMin1 and is licensed under GNU General
@@ -72,16 +72,15 @@
   NParsErr::NParsErr(const std::string &fname,
 		     size_t expected,
 		     size_t received):
-    BaseErr( (boost::format("In function %s expected %i but received %i pars ") 
+    BaseErr( (boost::format("In function %s expected %i but received %i pars ")
 	      % fname
 	      % expected
 	      % received).str())
   {
   }*/
-    
+
 
 #endif
 
 //}
-
 
