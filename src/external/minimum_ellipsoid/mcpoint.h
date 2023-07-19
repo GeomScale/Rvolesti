@@ -1,6 +1,6 @@
 // VolEsti (volume computation and sampling library)
 
-// Copyright (c) 20012-2018 Vissarion Fisikopoulos
+// Copyright (c) 2012-2018 Vissarion Fisikopoulos
 // Copyright (c) 2018 Apostolos Chalkis
 
 // This file is converted from BNMin1 (https://www.mrao.cam.ac.uk/~bn204/oof/bnmin1.html) by Apostolos Chalkis
@@ -8,7 +8,7 @@
 // Original copyright notice:
 
 /**
-   Bojan Nikolic <bojan@bnikolic.co.uk> 
+   Bojan Nikolic <bojan@bnikolic.co.uk>
    Initial version 2009
 
    This file is part of BNMin1 and is licensed under GNU General
@@ -132,13 +132,13 @@
     fval(0)
   {
   }
-  
+
   MCPoint::MCPoint(const std::vector<double> &p):
     p(p),
     ll(-9999),
     fval(0)
   {
-  }  
+  }
 
   MCPoint::MCPoint(size_t np):
     p(np),
@@ -213,7 +213,7 @@
   {
     moment2(l, m1, res);
     for(size_t j=0; j<res.size(); ++j)
-      res[j] /= Z;    
+      res[j] /= Z;
   }
 
   inline void moment1(const std::set<MCPoint> &s,
@@ -237,7 +237,7 @@
       }
       ++N;
     }
-    
+
     for(size_t j=0; j<res.size(); ++j)
     {
       res[j]/=N;
@@ -262,7 +262,7 @@
       }
       ++N;
     }
-    
+
     for(size_t j=0; j<res.size(); ++j)
     {
       res[j]/=N;
@@ -291,7 +291,7 @@
       }
       ++N;
     }
-    
+
     for(size_t j=0; j<res.size(); ++j)
     {
       res[j]/=N;
@@ -342,8 +342,8 @@
 		     w);
 
     gsl_eigen_symmv_free (w);
-    
-    gsl_eigen_symmv_sort (eval, 
+
+    gsl_eigen_symmv_sort (eval,
 			  evec,
 			  GSL_EIGEN_SORT_ABS_ASC);
 
@@ -357,7 +357,7 @@
 	eigvects[j*n+i]= gsl_matrix_get(evec, i,j);
       }
     }
-    
+
     gsl_vector_free (eval);
     gsl_matrix_free (evec);
   }*/
@@ -374,7 +374,7 @@
     //res.resize(pow(nbins, static_cast<size_t>(ndim)));
     res.resize( static_cast<int>( pow(static_cast<long double>(nbins), static_cast<long double>(ndim)) ) );
     std::fill(res.begin(), res.end(), 0.0);
-    
+
 
     std::vector<double> deltas(ndim);
     for(size_t i=0; i<ndim; ++i)
@@ -417,7 +417,7 @@
 		  std::vector<double > &res)
   {
     res.resize(nbins);
-    std::fill(res.begin(), res.end(), 
+    std::fill(res.begin(), res.end(),
 	      0.0);
 
     const double d=(high-low)/nbins;
@@ -451,25 +451,25 @@
   {
     // Two dimensions only
     res.resize( static_cast<int>( pow(static_cast<long double>(nbins), static_cast<long double>(2)) ) );
-    std::fill(res.begin(), res.end(), 
+    std::fill(res.begin(), res.end(),
 	      0.0);
     const double idelta=(ihigh-ilow)/nbins;
     const double jdelta=(jhigh-jlow)/nbins;
-    
+
     for(std::list<WPPoint>::const_iterator p=l.begin();
 	p!= l.end();
 	++p)
     {
-      
+
       int dimi = int((p->p[i]-ilow)/idelta);
       int dimj = int((p->p[j]-jlow)/jdelta);
-      
+
       if (dimi >= 0 and   dimi<((int)nbins)  and   dimj >= 0 and  dimj < ((int)nbins))
       {
 	const size_t k= dimi*nbins + dimj;
 	res[k]+= p->w * exp(- p->ll);
       }
-      
+
     }
   }
 //}
