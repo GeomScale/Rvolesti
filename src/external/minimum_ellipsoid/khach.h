@@ -78,7 +78,7 @@
   {
     Ap.resize(A.rows()+1, A.cols());
     Ap.topLeftCorner(A.rows(), A.cols()) = A;
-    Ap.row(Ap.rows()-1).setConstant(1.0);
+    Ap.row(Ap.rows()-1).setConstant(1.0); 
   }
 
   inline void genDiag(const VTT<double> &p, MTT<double> &res)
@@ -136,9 +136,9 @@
 
   }
 
-  inline void KaInvertDual(const MTT<double> &A,
-                      const VTT<double> &p,
-                      MTT<double> &Q,
+  inline void KaInvertDual(const MTT<double> &A, 
+                      const VTT<double> &p, 
+                      MTT<double> &Q, 
                       VTT<double> &c)
   {
     const size_t d = A.rows();
@@ -151,7 +151,7 @@
 
     VTT<double> M2;
     M2.noalias() = A * p;
-
+    
     MTT<double> M3;
     M3.noalias() = M2 * M2.transpose();
 
