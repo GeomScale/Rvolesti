@@ -1,11 +1,3 @@
-// Copyright(c) 2016-2018 Kjell Konis <kjell.konis@me.com>.
-// Version: 5.5.2.0-17
-// Description: The lpSolveAPI package provides an R interface to 'lp_solve',
-// a Mixed Integer Linear Programming (MILP) solver with support for pure
-//        linear, (mixed) integer/binary, semi-continuous and special ordered sets
-//        (SOS) models.
-// License: LGPL-2
-// Repository: CRAN
 
 #include <sys/types.h>
 
@@ -14,7 +6,7 @@
 #elif defined EnhTime
 # include <windows.h>
 #else
-# include <time.h>
+# include <sys/timeb.h>
 #endif
 
 #include <stdlib.h>
@@ -422,7 +414,7 @@ void hpsort(void *attributes, int count, int offset, int recsize, MYBOOL descend
         MEMCOPY(CMP_ATTRIBUTES(i), hold, recsize);
         i = j;
         j <<= 1;
-        }
+	    }
       else
         break;
     }
@@ -489,7 +481,7 @@ void hpsortex(void *attributes, int count, int offset, int recsize, MYBOOL desce
           tags[i] = tags[j];
           i = j;
           j <<= 1;
-        }
+  	    }
         else
           break;
       }
@@ -852,7 +844,10 @@ double timeNow(void)
   }
   return( timeBase + (double) now.QuadPart/(double) freq.QuadPart );
 #else
-    return((double)time(NULL));
+  
+
+  
+  return((double)0);
 #endif
 }
 

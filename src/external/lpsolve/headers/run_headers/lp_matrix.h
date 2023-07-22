@@ -1,12 +1,3 @@
-// Copyright(c) 2016-2018 Kjell Konis <kjell.konis@me.com>.
-// Version: 5.5.2.0-17
-// Description: The lpSolveAPI package provides an R interface to 'lp_solve',
-// a Mixed Integer Linear Programming (MILP) solver with support for pure
-//        linear, (mixed) integer/binary, semi-continuous and special ordered sets
-//        (SOS) models.
-// License: LGPL-2
-// Repository: CRAN
-
 #ifndef HEADER_lp_matrix
 #define HEADER_lp_matrix
 
@@ -199,7 +190,7 @@ STATIC MYBOOL mat_validate(MATrec *mat);
 STATIC MYBOOL mat_equalRows(MATrec *mat, int baserow, int comprow);
 STATIC int mat_findelm(MATrec *mat, int row, int column);
 STATIC int mat_findins(MATrec *mat, int row, int column, int *insertpos, MYBOOL validate);
-STATIC void mat_multcol(MATrec *mat, int col_nr, REAL mult, MYBOOL DoObj);
+STATIC void mat_multcol(MATrec *mat, int col_nr, REAL mult);
 STATIC REAL mat_getitem(MATrec *mat, int row, int column);
 STATIC MYBOOL mat_setitem(MATrec *mat, int row, int column, REAL value);
 STATIC MYBOOL mat_additem(MATrec *mat, int row, int column, REAL delta);

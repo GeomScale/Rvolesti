@@ -1,12 +1,3 @@
-// Copyright(c) 2016-2018 Kjell Konis <kjell.konis@me.com>.
-// Version: 5.5.2.0-17
-// Description: The lpSolveAPI package provides an R interface to 'lp_solve',
-// a Mixed Integer Linear Programming (MILP) solver with support for pure
-//        linear, (mixed) integer/binary, semi-continuous and special ordered sets
-//        (SOS) models.
-// License: LGPL-2
-// Repository: CRAN
-
 #include "lp_lib.h"
 #include "lp_report.h"
 
@@ -37,5 +28,7 @@
 
 #define FREE(ptr) if (ptr != NULL) {free(ptr), ptr = NULL;} else
 
+/* @FS: This is only used once, so there is no reason to define this!
 #define MALLOCCPY(nptr, optr, nr, type)\
-  (MALLOC(nptr, nr, type), (nptr != NULL) ? memcpy(nptr, optr, (size_t)((nr) * sizeof(*optr))) : 0)
+   (MALLOC(nptr, nr, type), (nptr != NULL) ? memcpy(nptr, optr, (size_t)((nr) * sizeof(*optr))) : 0, nptr)
+*/

@@ -6,8 +6,7 @@
 #include "lp_utils.h"
 #include <time.h>
 #include <sys/timeb.h>
-#include "lp_bit.h"
-#include "R_ext/Random.h"
+// #include "lp_bit.h"
 
 #ifdef FORTIFY
 # include "lp_fortify.h"
@@ -504,24 +503,26 @@ STATIC int searchFor(int target, int *attributes, int size, int offset, MYBOOL a
  /* Do binary search logic based on a sorted attribute vector */
   newPos = (beginPos + endPos) / 2;
   match = attributes[newPos];
-  if(absolute)
+  if(absolute) {
     match = abs(match);
+  }
+
   while(endPos - beginPos > LINEARSEARCH) {
     if(match < target) {
       beginPos = newPos + 1;
       newPos = (beginPos + endPos) / 2;
       match = attributes[newPos];
-      if(absolute)
+      if(absolute) {
         match = abs(match);
-    }
-    else if(match > target) {
+      }
+    } else if(match > target) {
       endPos = newPos - 1;
       newPos = (beginPos + endPos) / 2;
       match = attributes[newPos];
-      if(absolute)
+      if(absolute) {
         match = abs(match);
-    }
-    else {
+      }
+    } else {
       beginPos = newPos;
       endPos = newPos;
     }
@@ -530,16 +531,18 @@ STATIC int searchFor(int target, int *attributes, int size, int offset, MYBOOL a
  /* Do linear (unsorted) search logic */
   if(endPos - beginPos <= LINEARSEARCH) {
     match = attributes[beginPos];
-    if(absolute)
+    if(absolute) {
       match = abs(match);
-      while((beginPos < endPos) && (match != target)) {
-        beginPos++;
-        match = attributes[beginPos];
-        if(absolute)
-          match = abs(match);
-      }
-      if(match == target)
-        endPos = beginPos;
+    }
+    while((beginPos < endPos) && (match != target)) {
+      beginPos++;
+      match = attributes[beginPos];
+      if(absolute)
+        match = abs(match);
+    }
+    if(match == target) {
+      endPos = beginPos;
+    }
   }
 
  /* Return the index if a match was found, or signal failure with a -1 */
@@ -605,10 +608,9 @@ STATIC LPSREAL rand_uniform(lprec *lp, LPSREAL range)
 
   if(!randomized) {
     randomized = TRUE;
+    srand((unsigned) time( NULL ));
   }
-  GetRNGstate();
-  range *= (LPSREAL) unif_rand();
-  PutRNGstate();
+  range *= (LPSREAL) rand() / (LPSREAL) RAND_MAX;
   return( range );
 }
 
@@ -926,10 +928,12 @@ STATIC int compareLink(LLrec *linkmap1, LLrec *linkmap2)
   int test;
 
   test = memcmp(&linkmap1->size, &linkmap2->size, sizeof(int));
-  if(test == 0)
+  if(test == 0) {
     test = memcmp(&linkmap1->count, &linkmap2->count, sizeof(int));
-    if(test == 0)
-      test = memcmp(linkmap1->map, linkmap2->map, sizeof(int)*(2*linkmap1->size+1));
+  }
+  if(test == 0) {
+    test = memcmp(linkmap1->map, linkmap2->map, sizeof(int)*(2*linkmap1->size+1));
+  }
 
   return( test );
 }

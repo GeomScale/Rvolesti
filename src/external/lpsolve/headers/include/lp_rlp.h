@@ -1,11 +1,4 @@
-// Copyright(c) 2016-2018 Kjell Konis <kjell.konis@me.com>.
-// Version: 5.5.2.0-17
-// Description: The lpSolveAPI package provides an R interface to 'lp_solve',
-// a Mixed Integer Linear Programming (MILP) solver with support for pure
-//        linear, (mixed) integer/binary, semi-continuous and special ordered sets
-//        (SOS) models.
-// License: LGPL-2
-// Repository: CRAN
+
 
 
 #define  YY_INT_ALIGNED short int
@@ -1655,9 +1648,9 @@ static int lp_yy_get_next_buffer (lp_yyscan_t lp_yyscanner)
 
 #ifndef YY_NO_INPUT
 #ifdef __cplusplus
-    static inline int lp_yyinput (lp_yyscan_t lp_yyscanner)
+    static int lp_yyinput (lp_yyscan_t lp_yyscanner)
 #else
-    static inline int input  (lp_yyscan_t lp_yyscanner)
+    static int input  (lp_yyscan_t lp_yyscanner)
 #endif
 
 {
