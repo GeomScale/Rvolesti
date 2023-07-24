@@ -1263,7 +1263,12 @@ lprec *yacc_read(lprec *lp, int verbose, char *lp_name, int (*parse) (parse_parm
         if(pp->Rows) {
           int row;
 
-          MALLOCCPY(orig_upbo, lp->orig_upbo, 1 + pp->Rows, LPSREAL);
+          // @FS: replaced // MALLOCCPY(orig_upbo, lp->orig_upbo, 1 + pp->Rows, LPSREAL);
+          MALLOC(orig_upbo, 1 + pp->Rows, LPSREAL);
+          if ( orig_upbo != NULL ) {
+            memcpy(orig_upbo, lp->orig_upbo, (size_t)((1 + pp->Rows) * sizeof(*lp->orig_upbo)));
+          }
+
           for(row = 1; row <= pp->Rows; row++)
             set_constr_type(lp, row, pp->relat[row]);
 

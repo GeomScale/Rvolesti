@@ -1,12 +1,3 @@
-// Copyright(c) 2016-2018 Kjell Konis <kjell.konis@me.com>.
-// Version: 5.5.2.0-17
-// Description: The lpSolveAPI package provides an R interface to 'lp_solve',
-// a Mixed Integer Linear Programming (MILP) solver with support for pure
-//        linear, (mixed) integer/binary, semi-continuous and special ordered sets
-//        (SOS) models.
-// License: LGPL-2
-// Repository: CRAN
-
 #ifndef HEADER_lp_SOS
 #define HEADER_lp_SOS
 
@@ -105,7 +96,7 @@ MYBOOL SOS_set_marked(SOSgroup *group, int sosindex, int column, MYBOOL asactive
 MYBOOL SOS_unmark(SOSgroup *group, int sosindex, int column);
 int SOS_fix_unmarked(SOSgroup *group, int sosindex, int variable, REAL *bound, REAL value,
                      MYBOOL isupper, int *diffcount, DeltaVrec *changelog);
-int SOS_fix_list(SOSgroup *group, int sosindex, int variable, REAL *bound, 
+int SOS_fix_list(SOSgroup *group, int sosindex, int variable, REAL *bound,
                   int *varlist, MYBOOL isleft, DeltaVrec *changelog);
 int SOS_is_satisfied(SOSgroup *group, int sosindex, REAL *solution);
 MYBOOL SOS_is_feasible(SOSgroup *group, int sosindex, REAL *solution);

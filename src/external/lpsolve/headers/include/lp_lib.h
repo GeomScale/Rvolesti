@@ -1,11 +1,3 @@
-// Copyright(c) 2016-2018 Kjell Konis <kjell.konis@me.com>.
-// Version: 5.5.2.0-17
-// Description: The lpSolveAPI package provides an R interface to 'lp_solve',
-// a Mixed Integer Linear Programming (MILP) solver with support for pure
-//        linear, (mixed) integer/binary, semi-continuous and special ordered sets
-//        (SOS) models.
-// License: LGPL-2
-// Repository: CRAN
 
 #ifndef HEADER_lp_lib
 #define HEADER_lp_lib
@@ -70,6 +62,9 @@
 #if defined NOISNAN
 # define isnan(x) FALSE
 #endif
+
+// https://pubs.opengroup.org/onlinepubs/009695399/functions/dlsym.html
+#define MAKE_PEDANTIC_HAPPY(fptr) *(void **)(&fptr)
 
 #define SETMASK(variable, mask)     variable |= mask
 #define CLEARMASK(variable, mask)   variable &= ~(mask)
