@@ -3356,7 +3356,7 @@ x990:
    ================================================================== */
 void LU1FAC(LUSOLrec *LUSOL, int *INFORM)
 {
-  MYBOOL  KEEPLU, TCP, TPP, TRP, TSP;
+  MYBOOL  KEEPLU, TPP;
   int     LPIV, NELEM0, LPRINT, MINLEN, NUML0, LENL, LENU, LROW, MERSUM,
           NUTRI, NLTRI, NDENS1, NDENS2, NRANK, NSING, JSING, JUMIN, NUMNZ, LERR,
           LU, LL, LM, LTOPL, K, I, LENUK, J, LENLK, IDUMMY, LLSAVE, NMOVE, L2, L, NCP, NBUMP;
@@ -3381,9 +3381,6 @@ void LU1FAC(LUSOLrec *LUSOL, int *INFORM)
 /*      Drop tolerance */
   SMALL  = LUSOL->parmlu[LUSOL_RP_ZEROTOLERANCE];
   TPP = (MYBOOL) (LPIV==LUSOL_PIVMOD_TPP);
-  TRP = (MYBOOL) (LPIV==LUSOL_PIVMOD_TRP);
-  TCP = (MYBOOL) (LPIV==LUSOL_PIVMOD_TCP);
-  TSP = (MYBOOL) (LPIV==LUSOL_PIVMOD_TSP);
 /*      Initialize output parameters. */
   *INFORM = LUSOL_INFORM_LUSUCCESS;
   LERR   = 0;
@@ -3459,6 +3456,9 @@ void LU1FAC(LUSOLrec *LUSOL, int *INFORM)
         for TRP. Then compute the factorization  A = L*U.
         ------------------------------------------------------------------ */
 #ifdef ClassicHamaxR
+  MYBOOL TRP = (MYBOOL) (LPIV==LUSOL_PIVMOD_TRP);
+  MYBOOL TSP = (MYBOOL) (LPIV==LUSOL_PIVMOD_TSP);
+  MYBOOL TCP = (MYBOOL) (LPIV==LUSOL_PIVMOD_TCP);
   if(TPP || TSP) {
     LENH  = 1;
     LENA2 = LUSOL->lena;

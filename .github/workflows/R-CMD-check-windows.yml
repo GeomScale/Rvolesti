@@ -36,6 +36,9 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v2
 
+      - name: Fetch and update submodule
+        run: git submodule update --init --recursive
+
       - name: Install dependencies
         run: Rscript -e "install.packages(c('devtools', dependencies=TRUE))" -e "install.packages(c('rcmdcheck', 'devtools', 'Rcpp', 'RcppEigen', 'BH', 'testthat', 'downloader', 'xfun'))"
 

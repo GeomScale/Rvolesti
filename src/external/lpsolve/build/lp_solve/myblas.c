@@ -5,6 +5,7 @@
 #include <string.h>
 #include <math.h>
 #include "myblas.h"
+#define STRICT_R_HEADERS 
 #include "R_ext/BLAS.h"
 
 #ifdef FORTIFY

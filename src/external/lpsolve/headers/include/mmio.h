@@ -1,13 +1,4 @@
-// Copyright(c) 2016-2018 Kjell Konis <kjell.konis@me.com>.
-// Version: 5.5.2.0-17
-// Description: The lpSolveAPI package provides an R interface to 'lp_solve',
-// a Mixed Integer Linear Programming (MILP) solver with support for pure
-//        linear, (mixed) integer/binary, semi-continuous and special ordered sets
-//        (SOS) models.
-// License: LGPL-2
-// Repository: CRAN
-
- /*
+/*
 *   Matrix Market I/O library for ANSI C
 *
 *   See http://math.nist.gov/MatrixMarket for details.
@@ -134,9 +125,10 @@ int mm_read_mtx_crd_data(FILE *f, int M, int N, int nz, int I[], int J[],
 int mm_read_mtx_crd_entry(FILE *f, int *I, int *J, double *real, double *img,
       MM_typecode matcode);
 
+#ifndef R_EMBEDDED_LPSOLVE
 int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
                 double **val_, int **I_, int **J_);
-
+#endif
 
 
 #endif

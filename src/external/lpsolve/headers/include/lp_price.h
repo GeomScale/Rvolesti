@@ -1,12 +1,3 @@
-// Copyright(c) 2016-2018 Kjell Konis <kjell.konis@me.com>.
-// Version: 5.5.2.0-17
-// Description: The lpSolveAPI package provides an R interface to 'lp_solve',
-// a Mixed Integer Linear Programming (MILP) solver with support for pure
-//        linear, (mixed) integer/binary, semi-continuous and special ordered sets
-//        (SOS) models.
-// License: LGPL-2
-// Repository: CRAN
-
 #ifndef HEADER_lp_price
 #define HEADER_lp_price
 
@@ -45,7 +36,7 @@ STATIC MYBOOL validSubstitutionVar(pricerec *candidate);
 /* Row+column selection routines */
 STATIC MYBOOL findImprovementVar(pricerec *current, pricerec *candidate, MYBOOL collectMP, int *candidatecount);
 STATIC MYBOOL findSubstitutionVar(pricerec *current, pricerec *candidate, int *candidatecount);
-INLINE LPSREAL normalizeEdge(lprec *lp, int item, LPSREAL edge, MYBOOL isdual);
+LPSREAL normalizeEdge(lprec *lp, int item, LPSREAL edge, MYBOOL isdual);
 STATIC void makePriceLoop(lprec *lp, int *start, int *end, int *delta);
 
 /* Computation of reduced costs */

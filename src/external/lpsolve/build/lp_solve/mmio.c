@@ -14,6 +14,7 @@
 
 #include "mmio.h"
 
+#ifndef R_EMBEDDED_LPSOLVE
 int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
                 double **val_, int **I_, int **J_)
 {
@@ -83,6 +84,7 @@ int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
 
     return 0;
 }
+#endif
 
 int mm_is_valid(MM_typecode matcode)
 {
