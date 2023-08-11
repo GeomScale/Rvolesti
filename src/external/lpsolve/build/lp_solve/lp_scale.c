@@ -147,9 +147,10 @@ int CurtisReidScales(lprec *lp, MYBOOL _Advanced, LPSREAL *FRowScale, LPSREAL *F
          *residual_even, *residual_odd;
   LPSREAL   sk,   qk,     ek,
          skm1, qkm1,   ekm1,
-         qkm2, qkqkm1, ekm2, ekekm1,
+         qkqkm1, ekekm1,
          absvalue, logvalue,
          StopTolerance;
+  //@FS: unused// LPSREAL ekm2, qkm2;
   int    *RowCount, *ColCount, colMax;
   int    Result;
   MATrec *mat = lp->matA;
@@ -245,8 +246,8 @@ int CurtisReidScales(lprec *lp, MYBOOL _Advanced, LPSREAL *FRowScale, LPSREAL *F
     sk += (residual_even[col]*residual_even[col]) / (LPSREAL) ColCount[col];
 
   Result = 0;
-  qk=1; qkm1=0; qkm2=0;
-  ek=0; ekm1=0; ekm2=0;
+  qk=1; qkm1=0; //@FS: unused// qkm2=0;
+  ek=0; ekm1=0; //@FS: unused// ekm2=0;
 
   while(sk>StopTolerance) {
   /* Given the values of residual and sk, construct
@@ -331,11 +332,11 @@ int CurtisReidScales(lprec *lp, MYBOOL _Advanced, LPSREAL *FRowScale, LPSREAL *F
     }
 
     /* Compute ek and qk */
-    ekm2=ekm1;
+    //@FS: unused// ekm2=ekm1;
     ekm1=ek;
     ek=qk * sk / skm1;
 
-    qkm2=qkm1;
+    //@FS: unused// qkm2=qkm1;
     qkm1=qk;
     qk=1-ek;
 
@@ -629,7 +630,8 @@ STATIC MYBOOL scale_updaterows(lprec *lp, LPSREAL *scalechange, MYBOOL updateonl
 
 STATIC MYBOOL scale_columns(lprec *lp, LPSREAL *scaledelta)
 {
-  int     i,j, colMax, nz;
+  int i, j, nz;
+  //@FS: unused// int colMax;
   LPSREAL    *scalechange;
   LPSREAL    *value;
   int     *colnr;
@@ -644,7 +646,7 @@ STATIC MYBOOL scale_columns(lprec *lp, LPSREAL *scaledelta)
   else
     scalechange = &scaledelta[lp->rows];
 
-  colMax = lp->columns;
+  //@FS: unused// colMax = lp->columns;
 
   /* Scale matrix entries (including any Lagrangean constraints) */
   for(i = 1; i <= lp->columns; i++) {
