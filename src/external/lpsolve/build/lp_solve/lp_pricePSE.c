@@ -41,7 +41,7 @@
    ----------------------------------------------------------------------------------
 */
 
-INLINE MYBOOL applyPricer(lprec *lp)
+MYBOOL applyPricer(lprec *lp)
 {
   int rule = get_piv_rule(lp);
   return( (MYBOOL) ((rule == PRICER_DEVEX) || (rule == PRICER_STEEPESTEDGE)) );

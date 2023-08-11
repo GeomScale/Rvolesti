@@ -1,5 +1,6 @@
-^.*\.Rproj$
-^\.Rproj\.user$
-src/external/lpsolve/
-.github/
+.github
+.git
+.gitmodules
+.gitingore
 LICENSE
+inst/checks

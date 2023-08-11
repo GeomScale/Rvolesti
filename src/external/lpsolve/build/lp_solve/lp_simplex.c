@@ -994,7 +994,7 @@ STATIC int dualloop(lprec *lp, MYBOOL dualfeasible, int dualinfeasibles[], LPSRE
          ok = TRUE;
   int    *boundswaps = NULL;
   LREAL  theta = 0.0;
-  LPSREAL   epsvalue, xviolated, cviolated,
+  LPSREAL   xviolated, cviolated,
          *prow = NULL, *pcol = NULL,
          *drow = lp->drow;
   int    *nzprow = NULL, *workINT = NULL,
@@ -1054,7 +1054,7 @@ STATIC int dualloop(lprec *lp, MYBOOL dualfeasible, int dualinfeasibles[], LPSRE
   /* Do regular dual simplex variable initializations */
   lp->spx_status = RUNNING;
   minit = ITERATE_MAJORMAJOR;
-  epsvalue = lp->epspivot;
+  //@FS: unused// epsvalue = lp->epspivot;
 
   ok = stallMonitor_create(lp, TRUE, "dualloop");
   if(!ok)

@@ -1,11 +1,3 @@
-// Copyright(c) 2016-2018 Kjell Konis <kjell.konis@me.com>.
-// Version: 5.5.2.0-17
-// Description: The lpSolveAPI package provides an R interface to 'lp_solve',
-// a Mixed Integer Linear Programming (MILP) solver with support for pure
-//        linear, (mixed) integer/binary, semi-continuous and special ordered sets
-//        (SOS) models.
-// License: LGPL-2
-// Repository: CRAN
 
 #include <string.h>
 #include "commonlib.h"
@@ -202,14 +194,14 @@ STATIC MYBOOL inc_mat_space(MATrec *mat, int mindelta)
 
 STATIC MYBOOL inc_matrow_space(MATrec *mat, int deltarows)
 {
-  int    rowsum, oldrowsalloc;
+  int    rowsum;
   MYBOOL status = TRUE;
 
   /* Adjust lp row structures */
   if(mat->rows+deltarows >= mat->rows_alloc) {
 
     /* Update memory allocation and sizes */
-    oldrowsalloc = mat->rows_alloc;
+    //@FS: unused// oldrowsalloc = mat->rows_alloc;
     deltarows = DELTA_SIZE(deltarows, mat->rows);
     SETMAX(deltarows, DELTAROWALLOC);
     mat->rows_alloc += deltarows;
@@ -3302,7 +3294,7 @@ STATIC MYBOOL get_colIndexA(lprec *lp, int varset, int *colindex, MYBOOL append)
 #endif
     }
 
-    /* Find if the variable is in the scope - default is {ï¿½} */
+    /* Find if the variable is in the scope - default is {Ø} */
     i = lp->is_basic[varnr];
     if((varset & USE_BASICVARS) > 0 && (i))
       ;
@@ -3330,7 +3322,7 @@ STATIC int prod_Ax(lprec *lp, int *coltarget, LPSREAL *input, int *nzinput,
                               LPSREAL *output, int *nzoutput, int roundmode)
 /* prod_Ax is only used in fimprove; note that it is NOT VALIDATED/verified as of 20030801 - KE */
 {
-  int      j, colnr, ib, ie, vb, ve;
+  int      j, colnr, ib, ie, vb;
   MYBOOL   localset, localnz = FALSE, isRC;
   MATrec   *mat = lp->matA;
   LPSREAL     sdp;
@@ -3360,7 +3352,7 @@ STATIC int prod_Ax(lprec *lp, int *coltarget, LPSREAL *input, int *nzinput,
 
   /* Scan the columns */
   vb = 1;
-  ve = coltarget[0];
+  //@FS: unused// ve = coltarget[0];
   for(vb = 1; vb <= coltarget[0]; vb++) {
     colnr = coltarget[vb];
     j = lp->is_basic[colnr];

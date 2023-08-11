@@ -206,9 +206,9 @@ int BFP_CALLMODEL bfp_preparefactorization(lprec *lp)
 /* LOCAL HELPER ROUTINE - Replace a basis column with corresponding slack */
 int bfp_LUSOLsetcolumn(lprec *lp, int posnr, int colnr)
 {
-  int nz, inform;
+  int inform;
 
-  nz = lp->get_lpcolumn(lp, colnr, lp->invB->LUSOL->w + bfp_rowoffset(lp), NULL, NULL);
+  //@FS: unused// nz = lp->get_lpcolumn(lp, colnr, lp->invB->LUSOL->w + bfp_rowoffset(lp), NULL, NULL);
   inform = LUSOL_replaceColumn(lp->invB->LUSOL, posnr, lp->invB->LUSOL->w);
   return( inform );
 }
@@ -474,7 +474,7 @@ int BFP_CALLMODEL bfp_factorize(lprec *lp, int uservars, int Bsize, MYBOOL *used
 MYBOOL BFP_CALLMODEL bfp_finishupdate(lprec *lp, MYBOOL changesign)
 /* Was addetacol() in versions of lp_solve before 4.0.1.8 - KE */
 {
-  int      i, k, kcol, deltarows = bfp_rowoffset(lp);
+  int      i, k, deltarows = bfp_rowoffset(lp);
   LPSREAL     DIAG, VNORM;
   INVrec   *lu = lp->invB;
   LUSOLrec *LUSOL = lu->LUSOL;
@@ -491,7 +491,7 @@ MYBOOL BFP_CALLMODEL bfp_finishupdate(lprec *lp, MYBOOL changesign)
     lu->user_colcount--;
   if(lu->col_enter > lu->dimcount-deltarows)
     lu->user_colcount++;
-  kcol = lu->col_pos;
+  //@FS: unused// kcol = lu->col_pos;
   lu->col_pos = 0;
 
   /* Do standard update */

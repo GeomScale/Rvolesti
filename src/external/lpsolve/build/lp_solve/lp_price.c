@@ -44,16 +44,14 @@ int CMP_CALLMODEL compareImprovementVar(const pricerec *current, const pricerec 
   register int   result = COMP_PREFERNONE;
   register lprec *lp = current->lp;
   register LPSREAL  testvalue, margin = PREC_IMPROVEGAP;
-  int currentcolno, currentvarno = current->varno,
-      candidatecolno, candidatevarno = candidate->varno;
+  int currentvarno = current->varno,
+      candidatevarno = candidate->varno;
   MYBOOL isdual = candidate->isdual;
 
   if(isdual) {
     candidatevarno = lp->var_basic[candidatevarno];
     currentvarno   = lp->var_basic[currentvarno];
   }
-  candidatecolno = candidatevarno - lp->rows;
-  currentcolno   = currentvarno - lp->rows;
 
   /* Do pivot-based selection unless Bland's (first index) rule is active */
   if(lp->_piv_rule_ != PRICER_FIRSTINDEX) {
@@ -99,6 +97,8 @@ int CMP_CALLMODEL compareImprovementVar(const pricerec *current, const pricerec 
 #ifdef UseSortOnColumnLength
     /* Prevent long columns from entering the basis */
     if(result == COMP_PREFERNONE) {
+      int candidatecolno = candidatevarno - lp->rows;
+      int currentcolno   = currentvarno - lp->rows;
       if(candidatecolno > 0)
         testvalue = mat_collength(lp->matA, candidatecolno) +
                     (is_obj_in_basis(lp) && (lp->obj[candidatecolno] != 0) ? 1 : 0);
@@ -157,15 +157,13 @@ int CMP_CALLMODEL compareSubstitutionVar(const pricerec *current, const pricerec
   register LPSREAL   testvalue = candidate->theta,
                   margin = current->theta;
   MYBOOL isdual = candidate->isdual, candbetter;
-  int    currentcolno, currentvarno = current->varno,
-         candidatecolno, candidatevarno = candidate->varno;
+  int    currentvarno = current->varno,
+         candidatevarno = candidate->varno;
 
   if(!isdual) {
     candidatevarno = lp->var_basic[candidatevarno];
     currentvarno   = lp->var_basic[currentvarno];
   }
-  candidatecolno = candidatevarno - lp->rows;
-  currentcolno   = currentvarno - lp->rows;
 
   /* Compute the ranking test metric. */
   if(isdual) {
@@ -239,16 +237,20 @@ int CMP_CALLMODEL compareSubstitutionVar(const pricerec *current, const pricerec
 #ifdef UseSortOnColumnLength
       /* Prevent long columns from entering the basis */
       if(result == COMP_PREFERNONE) {
-        if(candidatecolno > 0)
+        int candidatecolno = candidatevarno - lp->rows;
+        int currentcolno   = currentvarno - lp->rows;
+        if(candidatecolno > 0) {
           testvalue = mat_collength(lp->matA, candidatecolno) +
                       (is_obj_in_basis(lp) && (lp->obj[candidatecolno] != 0) ? 1 : 0);
-        else
+        } else {
           testvalue = 1;
-        if(currentcolno > 0)
+        }
+        if(currentcolno > 0) {
           testvalue -= mat_collength(lp->matA, currentcolno) +
                        (is_obj_in_basis(lp) && (lp->obj[currentcolno] != 0) ? 1 : 0);
-        else
+        } else {
           testvalue -= 1;
+        }
         if(testvalue > 0)
           result = COMP_PREFERCANDIDATE;
         else if(testvalue < 0)
@@ -1538,7 +1540,7 @@ STATIC int coldual(lprec *lp, int row_nr, LPSREAL *prow, int *nzprow,
 } /* coldual */
 
 
-INLINE LPSREAL normalizeEdge(lprec *lp, int item, LPSREAL edge, MYBOOL isdual)
+LPSREAL normalizeEdge(lprec *lp, int item, LPSREAL edge, MYBOOL isdual)
 {
 #if 1
   /* Don't use the pricer "close to home", since this can possibly
@@ -1552,18 +1554,18 @@ INLINE LPSREAL normalizeEdge(lprec *lp, int item, LPSREAL edge, MYBOOL isdual)
 
 }
 
+
 /* Support routines for block detection and partial pricing */
 STATIC int partial_findBlocks(lprec *lp, MYBOOL autodefine, MYBOOL isrow)
 {
   int    i, jj, n, nb, ne, items;
   LPSREAL   hold, biggest, *sum = NULL;
   MATrec *mat = lp->matA;
-  partialrec *blockdata;
 
   if(!mat_validate(mat))
     return( 1 );
 
-  blockdata = IF(isrow, lp->rowblocks, lp->colblocks);
+  //@FS: unused// blockdata = IF(isrow, lp->rowblocks, lp->colblocks);
   items     = IF(isrow, lp->rows, lp->columns);
   allocREAL(lp, &sum, items+1, FALSE);
 
@@ -1642,6 +1644,8 @@ STATIC int partial_findBlocks(lprec *lp, MYBOOL autodefine, MYBOOL isrow)
 
   return( n );
 }
+
+
 STATIC int partial_blockStart(lprec *lp, MYBOOL isrow)
 {
   partialrec *blockdata;
