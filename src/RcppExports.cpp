@@ -264,7 +264,6 @@ BEGIN_RCPP
 END_RCPP
 }
 
-RcppExport SEXP _rcpp_module_boot_polytopes();
 RcppExport SEXP _rcpp_module_boot_spectrahedron();
 
 static const R_CallMethodDef CallEntries[] = {
@@ -287,7 +286,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_volesti_loadSdpaFormatFile", (DL_FUNC) &_volesti_loadSdpaFormatFile, 1},
     {"_volesti_volume", (DL_FUNC) &_volesti_volume, 4},
     {"_volesti_zono_approx", (DL_FUNC) &_volesti_zono_approx, 4},
-    {"_rcpp_module_boot_polytopes", (DL_FUNC) &_rcpp_module_boot_polytopes, 0},
     {"_rcpp_module_boot_spectrahedron", (DL_FUNC) &_rcpp_module_boot_spectrahedron, 0},
     {NULL, NULL, 0}
 };
