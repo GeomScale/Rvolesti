@@ -4,5 +4,3 @@
 .gitingore
 LICENSE
 inst/checks
-^.*\.Rproj$
-^\.Rproj\.user$
