@@ -18,9 +18,9 @@ To use the development version of `volesti` that includes the C++ code, you need
 cd src
 cd include
 ```
-* Fetch the submodule from the repository https://github.com/Soumya624/volesti:
+* Fetch the submodule from the [volesti](https://github.com/GeomScale/volesti) repository:
 ```
-git submodule update --init --recursive
+git submodule update --recursive --init --remote
 ```
 * Install volesti by running:
 ```
