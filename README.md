@@ -42,7 +42,7 @@ The C++ source code is retrieved from [volesti](https://github.com/GeomScale/vol
 - Update the `cran_include` branch in [volesti](https://github.com/GeomScale/volesti)
     - Clone the main `volesti` repository
     - Checkout to the `cran_include` branch
-    - Update your code a open a PR similar to https://github.com/GeomScale/volesti/pull/277
+    - Update your code and open a PR similar to https://github.com/GeomScale/volesti/pull/277
 - Retrieve the new `include` directory using submodule
 ```
 git submodule update --recursive --init --remote
