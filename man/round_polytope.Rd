@@ -4,14 +4,16 @@
 \alias{round_polytope}
 \title{Apply rounding to a convex polytope (H-polytope, V-polytope or a zonotope)}
 \usage{
-round_polytope(P, method = NULL, seed = NULL)
+round_polytope(P, settings = list())
 }
 \arguments{
 \item{P}{A convex polytope. It is an object from class (a) Hpolytope or (b) Vpolytope or (c) Zonotope.}
 
-\item{method}{Optional. The method to use for rounding, a) \code{'min_ellipsoid'} for the method based on mimimmum volume enclosing ellipsoid of a dataset, b) \code{'max_ellipsoid'} for the method based on maximum volume enclosed ellipsoid, (c) \code{'isotropy'} for the method based on svd decomposition. The default method is \code{'mee'} for all the representations.}
-
-\item{seed}{Optional. A fixed seed for the number generator.}
+\item{settings}{Optional. A list of settings.
+\itemize{
+\item{\code{method} }{ The method to use for rounding, a) \code{'min_ellipsoid'} for the method based on mimimmum volume enclosing ellipsoid of a dataset, b) \code{'max_ellipsoid'} for the method based on maximum volume enclosed ellipsoid, (c) \code{'isotropy'} for the method based on svd decomposition. The default method is \code{'mee'} for all the representations.}
+\item{\code{seed} }{ Optional. A fixed seed for the number generator.}
+}}
 }
 \value{
 A list with 4 elements: (a) a polytope of the same class as the input polytope class and (b) the element "T" which is the matrix of the inverse linear transformation that is applied on the input polytope, (c)  the element "shift" which is the opposite vector of that which has shifted the input polytope, (d) the element "round_value" which is the determinant of the square matrix of the linear transformation that is applied on the input polytope.

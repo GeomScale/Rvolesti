@@ -25,21 +25,21 @@
 #include "preprocess/max_inscribed_ellipsoid_rounding.hpp"
 #include "extractMatPoly.h"
 
-template 
+template
 <
     typename MT,
-    typename VT, 
-    typename WalkType, 
-    typename Polytope, 
-    typename Point, 
-    typename NT, 
+    typename VT,
+    typename WalkType,
+    typename Polytope,
+    typename Point,
+    typename NT,
     typename RNGType
 >
 std::tuple<MT, VT, NT> apply_rounding(Polytope &P,
                                       std::string const& method_rcpp,
                                       unsigned int const& walkL,
-                                      std::pair<Point, NT> &InnerBall, 
-                                      RNGType &rng) 
+                                      std::pair<Point, NT> &InnerBall,
+                                      RNGType &rng)
 {
     std::tuple<MT, VT, NT> round_res;
     if (method_rcpp.compare(std::string("min_ellipsoid")) == 0) {
@@ -62,7 +62,7 @@ std::tuple<MT, VT, NT> apply_rounding(Polytope &P,
 //'
 //' @return A numerical matrix that describes the rounded polytope, a numerical matrix of the inverse linear transofmation that is applied on the input polytope, the numerical vector the the input polytope is shifted and the determinant of the matrix of the linear transformation that is applied on the input polytope.
 // [[Rcpp::export]]
-Rcpp::List rounding (Rcpp::Reference P, 
+Rcpp::List rounding (Rcpp::Reference P,
                      Rcpp::Nullable<std::string> method = R_NilValue,
                      Rcpp::Nullable<double> seed = R_NilValue){
 
@@ -76,7 +76,27 @@ Rcpp::List rounding (Rcpp::Reference P,
     typedef Eigen::Matrix<NT,Eigen::Dynamic,1> VT;
     typedef Eigen::Matrix<NT,Eigen::Dynamic,Eigen::Dynamic> MT;
 
-    unsigned int n = P.field("dimension"), walkL = 2, type = P.field("type");
+    unsigned int n;
+    unsigned int walkL=2;
+    unsigned int type;
+
+    std::string type_str = Rcpp::as<std::string>(P.slot("type"));
+
+    if (type_str.compare(std::string("Hpolytope")) == 0) {
+        n = Rcpp::as<MT>(P.slot("A")).cols();
+        type = 1;
+    } else if (type_str.compare(std::string("Vpolytope")) == 0) {
+        n = Rcpp::as<MT>(P.slot("V")).cols();
+        type = 2;
+    } else if (type_str.compare(std::string("Zonotope")) == 0) {
+        n = Rcpp::as<MT>(P.slot("G")).cols();
+        type = 3;
+    } else if (type_str.compare(std::string("VpolytopeIntersection")) == 0) {
+        throw Rcpp::exception("volesti does not support roatation of this kind of representation.");
+    } else {
+        throw Rcpp::exception("Unknown polytope representation!");
+    }
+
     std::string method_rcpp = std::string("isotropy");
     if(method.isNotNull()) {
         method_rcpp =  Rcpp::as<std::string>(method);
@@ -98,11 +118,10 @@ Rcpp::List rounding (Rcpp::Reference P,
     switch (type) {
         case 1: {
             // Hpolytope
-
-            if (Rcpp::as<MT>(P.field("Aeq")).rows() > 0) {
-                throw Rcpp::exception("volesti supports rounding for full dimensional polytopes");
-            } 
-            Hpolytope HP(n, Rcpp::as<MT>(P.field("A")), Rcpp::as<VT>(P.field("b")));
+            //if (Rcpp::as<MT>(P.slot("Aeq")).rows() > 0) {
+            //    throw Rcpp::exception("volesti supports rounding for full dimensional polytopes");
+            // }
+            Hpolytope HP(n, Rcpp::as<MT>(P.slot("A")), Rcpp::as<VT>(P.slot("b")));
             InnerBall = HP.ComputeInnerBall();
             if (InnerBall.second < 0.0) throw Rcpp::exception("Unable to compute a feasible point.");
             if (method_rcpp.compare(std::string("max_ellipsoid")) == 0) {
@@ -115,7 +134,7 @@ Rcpp::List rounding (Rcpp::Reference P,
         }
         case 2: {
             // Vpolytope
-            Vpolytope VP(n, Rcpp::as<MT>(P.field("V")), VT::Ones(Rcpp::as<MT>(P.field("V")).rows()));
+            Vpolytope VP(n, Rcpp::as<MT>(P.slot("V")), VT::Ones(Rcpp::as<MT>(P.slot("V")).rows()));
             InnerBall = VP.ComputeInnerBall();
             if (InnerBall.second < 0.0) throw Rcpp::exception("Unable to compute a feasible point.");
             round_res = apply_rounding<MT, VT, BilliardWalk>(VP, method_rcpp, walkL, InnerBall, rng);
@@ -124,7 +143,7 @@ Rcpp::List rounding (Rcpp::Reference P,
         }
         case 3: {
             // Zonotope
-            zonotope ZP(n, Rcpp::as<MT>(P.field("G")), VT::Ones(Rcpp::as<MT>(P.field("G")).rows()));
+            zonotope ZP(n, Rcpp::as<MT>(P.slot("G")), VT::Ones(Rcpp::as<MT>(P.slot("G")).rows()));
             InnerBall = ZP.ComputeInnerBall();
             if (InnerBall.second < 0.0) throw Rcpp::exception("Unable to compute a feasible point.");
             round_res = apply_rounding<MT, VT, BilliardWalk>(ZP, method_rcpp, walkL, InnerBall, rng);

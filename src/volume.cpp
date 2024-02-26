@@ -2,7 +2,7 @@
 
 // VolEsti (volume computation and sampling library)
 
-// Copyright (c) 2012-2020 Vissarion Fisikopoulos
+// Copyright (c) 2012-2024 Vissarion Fisikopoulos
 // Copyright (c) 2018-2020 Apostolos Chalkis
 
 //Contributed and/or modified by Apostolos Chalkis, as part of Google Summer of Code 2018 and 2019 program.
@@ -29,8 +29,8 @@ enum rounding_type {none, min_ellipsoid, max_ellipsoid, isotropy};
 
 template <typename Polytope,  typename RNGType,  typename NT>
 std::pair<double, double> generic_volume(Polytope& P, RNGType &rng, unsigned int walk_length, NT e,
-                      volume_algorithms const& algo, unsigned int win_len,
-                      rounding_type const& rounding, random_walks const& walk)
+                                         volume_algorithms const& algo, unsigned int win_len,
+                                         rounding_type const& rounding, random_walks const& walk)
 {
     typedef typename Polytope::MT MT;
     typedef typename Polytope::VT VT;
@@ -181,6 +181,7 @@ std::pair<double, double> generic_volume(Polytope& P, RNGType &rng, unsigned int
 //' \item{\code{walk_length} }{ An integer to set the number of the steps for the random walk. The default value is \eqn{\lfloor 10 + d/10\rfloor} for \code{'SOB'} and \eqn{1} otherwise.}
 //' \item{\code{win_len} }{ The length of the sliding window for CB or CG algorithm. The default value is \eqn{250} for CB with BiW and \eqn{400+3d^2} for CB and any other random walk and \eqn{500+4d^2} for CG.}
 //' \item{\code{hpoly} }{ A boolean parameter to use H-polytopes in MMC of CB algorithm when the input polytope is a zonotope. The default value is \code{TRUE} when the order of the zonotope is \eqn{<5}, otherwise it is \code{FALSE}.}
+//' \item{\code{seed} }{ A fixed seed for the number generator.}
 //' }
 //' @param rounding Optional. A string parameter to request a rounding method to be applied in the input polytope before volume computation: a) \code{'min_ellipsoid'}, b) \code{'svd'}, c) \code{'max_ellipsoid'} and d) \code{'none'} for no rounding.
 //' @param seed Optional. A fixed seed for the number generator.
@@ -210,9 +211,8 @@ std::pair<double, double> generic_volume(Polytope& P, RNGType &rng, unsigned int
 //' @export
 // [[Rcpp::export]]
 Rcpp::List volume (Rcpp::Reference P,
-               Rcpp::Nullable<Rcpp::List> settings = R_NilValue,
-               Rcpp::Nullable<std::string> rounding = R_NilValue,
-               Rcpp::Nullable<double> seed = R_NilValue) {
+                   Rcpp::Nullable<Rcpp::List> settings = R_NilValue,
+                   Rcpp::Nullable<std::string> rounding = R_NilValue) {
 
     typedef double NT;
     typedef Cartesian<NT>    Kernel;
@@ -224,12 +224,30 @@ Rcpp::List volume (Rcpp::Reference P,
     typedef IntersectionOfVpoly<Vpolytope, RNGType> InterVP;
     typedef Eigen::Matrix<NT,Eigen::Dynamic,1> VT;
     typedef Eigen::Matrix<NT,Eigen::Dynamic,Eigen::Dynamic> MT;
-    unsigned int n = P.field("dimension"), walkL, type = P.field("type");
+
+    unsigned int n, walkL, type;
+    std::string type_str = Rcpp::as<std::string>(P.slot("type"));
+
+    if (type_str.compare(std::string("Hpolytope")) == 0) {
+        n = Rcpp::as<MT>(P.slot("A")).cols();
+        type = 1;
+    } else if (type_str.compare(std::string("Vpolytope")) == 0) {
+        n = Rcpp::as<MT>(P.slot("V")).cols();
+        type = 2;
+    } else if (type_str.compare(std::string("Zonotope")) == 0) {
+        n = Rcpp::as<MT>(P.slot("G")).cols();
+        type = 3;
+    } else if (type_str.compare(std::string("VpolytopeIntersection")) == 0) {
+        n = Rcpp::as<MT>(P.slot("V1")).cols();
+        type = 4;
+    } else {
+        throw Rcpp::exception("Unknown polytope representation!");
+    }
 
     RNGType rng(n);
-    if (seed.isNotNull()) {
-        unsigned seed_rcpp = Rcpp::as<double>(seed);
-        rng.set_seed(seed_rcpp);
+    if (Rcpp::as<Rcpp::List>(settings).containsElementNamed("seed")) {
+        unsigned seed_tmp = Rcpp::as<double>(Rcpp::as<Rcpp::List>(settings)["seed"]);
+        rng.set_seed(seed_tmp);
     }
 
     bool round = false, hpoly = false;
@@ -333,19 +351,19 @@ Rcpp::List volume (Rcpp::Reference P,
     switch(type) {
         case 1: {
             // Hpolytope
-            Hpolytope HP(n, Rcpp::as<MT>(P.field("A")), Rcpp::as<VT>(P.field("b")));
+            Hpolytope HP(n, Rcpp::as<MT>(P.slot("A")), Rcpp::as<VT>(P.slot("b")));
             pair_vol = generic_volume(HP, rng, walkL, e, algo, win_len, rounding_method, walk);
             break;
         }
         case 2: {
             // Vpolytope
-            Vpolytope VP(n, Rcpp::as<MT>(P.field("V")), VT::Ones(Rcpp::as<MT>(P.field("V")).rows()));
+            Vpolytope VP(n, Rcpp::as<MT>(P.slot("V")), VT::Ones(Rcpp::as<MT>(P.slot("V")).rows()));
             pair_vol = generic_volume(VP, rng, walkL, e, algo, win_len, rounding_method, walk);
             break;
         }
         case 3: {
             // Zonotope
-            zonotope ZP(n, Rcpp::as<MT>(P.field("G")), VT::Ones(Rcpp::as<MT>(P.field("G")).rows()));
+            zonotope ZP(n, Rcpp::as<MT>(P.slot("G")), VT::Ones(Rcpp::as<MT>(P.slot("G")).rows()));
             if (Rcpp::as<Rcpp::List>(settings).containsElementNamed("hpoly")) {
                 hpoly = Rcpp::as<bool>(Rcpp::as<Rcpp::List>(settings)["hpoly"]);
                 if (hpoly && (algo == CG || algo == SOB))
@@ -388,14 +406,15 @@ Rcpp::List volume (Rcpp::Reference P,
         }
         case 4: {
             // Intersection of two V-polytopes
-            Vpolytope VP1(n, Rcpp::as<MT>(P.field("V1")), VT::Ones(Rcpp::as<MT>(P.field("V1")).rows()));
-            Vpolytope VP2(n, Rcpp::as<MT>(P.field("V2")), VT::Ones(Rcpp::as<MT>(P.field("V2")).rows()));
+            Vpolytope VP1(n, Rcpp::as<MT>(P.slot("V1")), VT::Ones(Rcpp::as<MT>(P.slot("V1")).rows()));
+            Vpolytope VP2(n, Rcpp::as<MT>(P.slot("V2")), VT::Ones(Rcpp::as<MT>(P.slot("V2")).rows()));
             InterVP VPcVP;
-            if (!seed.isNotNull()) {
-                InterVP VPcVP(VP1, VP2);
+            if (Rcpp::as<Rcpp::List>(settings).containsElementNamed("seed")) {
+                unsigned seed_tmp = Rcpp::as<double>(Rcpp::as<Rcpp::List>(settings)["seed"]);
+                rng.set_seed(seed_tmp);
+                InterVP VPcVP(VP1, VP2, seed_tmp);
             } else {
-                unsigned seed3 = Rcpp::as<double>(seed);
-                InterVP VPcVP(VP1, VP2, seed3);
+                InterVP VPcVP(VP1, VP2);
             }
             if (!VPcVP.is_feasible()) throw Rcpp::exception("Empty set!");
             pair_vol = generic_volume(VPcVP, rng, walkL, e, algo, win_len, rounding_method, walk);

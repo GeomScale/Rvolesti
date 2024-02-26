@@ -99,8 +99,8 @@ ess <- function(samples) {
 #' vol = exact_vol(Z)
 #'
 #' \donttest{# compute the exact volume of a 2-d arbitrary simplex
-#' V = matrix(c(2,3,-1,7,0,0),ncol = 2, nrow = 3, byrow = TRUE)
-#' P = Vpolytope$new(V)
+#' A = matrix(c(2,3,-1,7,0,0),ncol = 2, nrow = 3, byrow = TRUE)
+#' P = Vpolytope(V = A)
 #' vol = exact_vol(P)
 #' }
 #'
@@ -174,6 +174,17 @@ geweke <- function(samples, frac_first = NULL, frac_last = NULL) {
 #' @export
 inner_ball <- function(P, lpsolve = NULL) {
     .Call(`_volesti_inner_ball`, P, lpsolve)
+}
+
+#'  An internal Rccp function to read a SDPA format file
+#'
+#' @param input_file Name of the input file
+#'
+#' @keywords internal
+#'
+#' @return A list with two named items: an item "matrices" which is a list of the matrices and an vector "objFunction"
+load_sdpa_format_file <- function(input_file = NULL) {
+    .Call(`_volesti_load_sdpa_format_file`, input_file)
 }
 
 #' Solve an ODE of the form dx^n / dt^n = F(x, t)
@@ -305,7 +316,7 @@ rounding <- function(P, method = NULL, seed = NULL) {
 #' \item{\code{BaW_rad} }{ The radius for the ball walk.}
 #' \item{\code{L} }{ The maximum length of the billiard trajectory or the radius for the step of dikin, vaidya or john walk.}
 #' \item{\code{solver} }{ Specify ODE solver for logconcave sampling. Options are i) leapfrog, ii) euler iii) runge-kutta iv) richardson}
-#' \item{\code{step_size }{ Optionally chosen step size for logconcave sampling. Defaults to a theoretical value if not provided.}
+#' \item{\code{step_size} }{ Optionally chosen step size for logconcave sampling. Defaults to a theoretical value if not provided.}
 #' }
 #' @param distribution Optional. A list that declares the target density and some related parameters as follows:
 #' \itemize{
@@ -347,7 +358,7 @@ rounding <- function(P, method = NULL, seed = NULL) {
 #' # gaussian distribution from the 2d unit simplex in H-representation with variance = 2
 #' A = matrix(c(-1,0,0,-1,1,1), ncol=2, nrow=3, byrow=TRUE)
 #' b = c(0,0,1)
-#' P = Hpolytope$new(A,b)
+#' P = Hpolytope(A = A, b = b)
 #' points = sample_points(P, n = 100, distribution = list("density" = "gaussian", "variance" = 2))
 #'
 #' # uniform points from the boundary of a 2-dimensional random H-polytope
@@ -376,7 +387,7 @@ sample_points <- function(P, n, random_walk = NULL, distribution = NULL, seed = 
 #' A1 = matrix(c(-1,0,0,0,0,1,0,1,0), nrow=3, ncol=3, byrow = TRUE)
 #' A2 = matrix(c(0,0,-1,0,0,0,-1,0,0), nrow=3, ncol=3, byrow = TRUE)
 #' lmi = list(A0, A1, A2)
-#' S = Spectrahedron$new(lmi);
+#' S = Spectrahedron(matrices = lmi)
 #' objFunction = c(1,1)
 #' writeSdpaFormatFile(S, objFunction, "output.txt")
 #' }
@@ -412,6 +423,7 @@ loadSdpaFormatFile <- function(inputFile = NULL) {
 #' \item{\code{walk_length} }{ An integer to set the number of the steps for the random walk. The default value is \eqn{\lfloor 10 + d/10\rfloor} for \code{'SOB'} and \eqn{1} otherwise.}
 #' \item{\code{win_len} }{ The length of the sliding window for CB or CG algorithm. The default value is \eqn{250} for CB with BiW and \eqn{400+3d^2} for CB and any other random walk and \eqn{500+4d^2} for CG.}
 #' \item{\code{hpoly} }{ A boolean parameter to use H-polytopes in MMC of CB algorithm when the input polytope is a zonotope. The default value is \code{TRUE} when the order of the zonotope is \eqn{<5}, otherwise it is \code{FALSE}.}
+#' \item{\code{seed} }{ A fixed seed for the number generator.}
 #' }
 #' @param rounding Optional. A string parameter to request a rounding method to be applied in the input polytope before volume computation: a) \code{'min_ellipsoid'}, b) \code{'svd'}, c) \code{'max_ellipsoid'} and d) \code{'none'} for no rounding.
 #' @param seed Optional. A fixed seed for the number generator.
@@ -439,8 +451,32 @@ loadSdpaFormatFile <- function(inputFile = NULL) {
 #' pair_vol = volume(Z, settings = list("random_walk" = "RDHR", "walk_length" = 2))
 #'
 #' @export
-volume <- function(P, settings = NULL, rounding = NULL, seed = NULL) {
-    .Call(`_volesti_volume`, P, settings, rounding, seed)
+volume <- function(P, settings = NULL, rounding = NULL) {
+    .Call(`_volesti_volume`, P, settings, rounding)
+}
+
+#' Write a SDPA format file
+#'
+#' Outputs a spectrahedron (the matrices defining a linear matrix inequality) and a vector (the objective function)
+#' to a SDPA format file.
+#'
+#' @param spectrahedron A spectrahedron in n dimensions; must be an object of class Spectrahedron
+#' @param objective_function A numerical vector of length n
+#' @param output_file Name of the output file
+#'
+#' @examples
+#' \donttest{
+#' A0 = matrix(c(-1,0,0,0,-2,1,0,1,-2), nrow=3, ncol=3, byrow = TRUE)
+#' A1 = matrix(c(-1,0,0,0,0,1,0,1,0), nrow=3, ncol=3, byrow = TRUE)
+#' A2 = matrix(c(0,0,-1,0,0,0,-1,0,0), nrow=3, ncol=3, byrow = TRUE)
+#' lmi = list(A0, A1, A2)
+#' S = Spectrahedron(matrices = lmi)
+#' objFunction = c(1,1)
+#' write_sdpa_format_file(S, objFunction, "output.txt")
+#' }
+#' @export
+write_sdpa_format_file <- function(spectrahedron, objective_function, output_file) {
+    invisible(.Call(`_volesti_write_sdpa_format_file`, spectrahedron, objective_function, output_file))
 }
 
 #' An internal Rccp function for the over-approximation of a zonotope

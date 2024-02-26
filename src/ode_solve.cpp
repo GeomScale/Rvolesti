@@ -151,10 +151,10 @@ Rcpp::List ode_solve(Rcpp::Nullable<unsigned int> n,
 
       Hpolytope HP(dim, Rcpp::as<MT>(
                     Rcpp::as<Rcpp::Reference>(Rcpp::as<Rcpp::List>(domains)
-                    [domain_name.c_str()]).field("A")),
+                    [domain_name.c_str()]).slot("A")),
                    Rcpp::as<VT>(
                      Rcpp::as<Rcpp::Reference>(Rcpp::as<Rcpp::List>(domains)
-                     [domain_name.c_str()]).field("b"))
+                     [domain_name.c_str()]).slot("b"))
               );
 
       HP.normalize();

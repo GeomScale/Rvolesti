@@ -32,7 +32,7 @@
 //' ball_vec = inner_ball(P, lpsolve = TRUE)
 //' @export
 // [[Rcpp::export]]
-Rcpp::NumericVector inner_ball(Rcpp::Reference P, 
+Rcpp::NumericVector inner_ball(Rcpp::Reference P,
                                Rcpp::Nullable<bool> lpsolve = R_NilValue) {
 
     typedef double NT;
@@ -45,15 +45,34 @@ Rcpp::NumericVector inner_ball(Rcpp::Reference P,
     typedef IntersectionOfVpoly<Vpolytope, RNGType> InterVP;
     typedef Eigen::Matrix<NT,Eigen::Dynamic,1> VT;
     typedef Eigen::Matrix<NT,Eigen::Dynamic,Eigen::Dynamic> MT;
-    unsigned int n = P.field("dimension"), type = P.field("type");
 
     std::pair <Point, NT> InnerBall;
     bool lp_solve = (lpsolve.isNotNull()) ? Rcpp::as<bool>(lpsolve) : false;
 
+    unsigned int n;
+    unsigned int type;
+    std::string type_str = Rcpp::as<std::string>(P.slot("type"));
+
+    if (type_str.compare(std::string("Hpolytope")) == 0) {
+        n = Rcpp::as<MT>(P.slot("A")).cols();
+        type = 1;
+    } else if (type_str.compare(std::string("Vpolytope")) == 0) {
+        n = Rcpp::as<MT>(P.slot("V")).cols();
+        type = 2;
+    } else if (type_str.compare(std::string("Zonotope")) == 0) {
+        n = Rcpp::as<MT>(P.slot("G")).cols();
+        type = 3;
+    } else if (type_str.compare(std::string("VpolytopeIntersection")) == 0) {
+        n = Rcpp::as<MT>(P.slot("V1")).cols();
+        type = 4;
+    } else {
+        throw Rcpp::exception("Unknown polytope representation!");
+    }
+
     switch (type) {
         case 1: {
             // Hpolytope
-            Hpolytope HP(n, Rcpp::as<MT>(P.field("A")), Rcpp::as<VT>(P.field("b")));
+            Hpolytope HP(n, Rcpp::as<MT>(P.slot("A")), Rcpp::as<VT>(P.slot("b")));
             if (lp_solve) {
                 InnerBall = ComputeChebychevBall<NT, Point>(HP.get_mat(), HP.get_vec());
             } else {
@@ -64,22 +83,22 @@ Rcpp::NumericVector inner_ball(Rcpp::Reference P,
         }
         case 2: {
             // Vpolytope
-            Vpolytope VP(n, Rcpp::as<MT>(P.field("V")), VT::Ones(Rcpp::as<MT>(P.field("V")).rows()));
+            Vpolytope VP(n, Rcpp::as<MT>(P.slot("V")), VT::Ones(Rcpp::as<MT>(P.slot("V")).rows()));
             InnerBall = VP.ComputeInnerBall();
             if (InnerBall.second < 0.0) throw Rcpp::exception("Unable to compute a feasible point.");
             break;
         }
         case 3: {
             // Zonotope
-            zonotope ZP(n, Rcpp::as<MT>(P.field("G")), VT::Ones(Rcpp::as<MT>(P.field("G")).rows()));
+            zonotope ZP(n, Rcpp::as<MT>(P.slot("G")), VT::Ones(Rcpp::as<MT>(P.slot("G")).rows()));
             InnerBall = ZP.ComputeInnerBall();
             if (InnerBall.second < 0.0) throw Rcpp::exception("Unable to compute a feasible point.");
             break;
         }
         case 4: {
             // Intersection of two V-polytopes
-            Vpolytope VP1(n, Rcpp::as<MT>(P.field("V1")), VT::Ones(Rcpp::as<MT>(P.field("V1")).rows()));
-            Vpolytope VP2(n, Rcpp::as<MT>(P.field("V2")), VT::Ones(Rcpp::as<MT>(P.field("V2")).rows()));
+            Vpolytope VP1(n, Rcpp::as<MT>(P.slot("V1")), VT::Ones(Rcpp::as<MT>(P.slot("V1")).rows()));
+            Vpolytope VP2(n, Rcpp::as<MT>(P.slot("V2")), VT::Ones(Rcpp::as<MT>(P.slot("V2")).rows()));
             InterVP VPcVP(VP1, VP2);
             if (!VPcVP.is_feasible()) throw Rcpp::exception("Empty set!");
             InnerBall = VPcVP.ComputeInnerBall();

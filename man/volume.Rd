@@ -4,7 +4,7 @@
 \alias{volume}
 \title{The main function for volume approximation of a convex Polytope (H-polytope, V-polytope, zonotope or intersection of two V-polytopes). It returns a list with two elements: (a) the logarithm of the estimated volume and (b) the estimated volume}
 \usage{
-volume(P, settings = NULL, rounding = NULL, seed = NULL)
+volume(P, settings = NULL, rounding = NULL)
 }
 \arguments{
 \item{P}{A convex polytope. It is an object from class a) Hpolytope or b) Vpolytope or c) Zonotope or d) VpolytopeIntersection.}
@@ -17,6 +17,7 @@ volume(P, settings = NULL, rounding = NULL, seed = NULL)
 \item{\code{walk_length} }{ An integer to set the number of the steps for the random walk. The default value is \eqn{\lfloor 10 + d/10\rfloor} for \code{'SOB'} and \eqn{1} otherwise.}
 \item{\code{win_len} }{ The length of the sliding window for CB or CG algorithm. The default value is \eqn{250} for CB with BiW and \eqn{400+3d^2} for CB and any other random walk and \eqn{500+4d^2} for CG.}
 \item{\code{hpoly} }{ A boolean parameter to use H-polytopes in MMC of CB algorithm when the input polytope is a zonotope. The default value is \code{TRUE} when the order of the zonotope is \eqn{<5}, otherwise it is \code{FALSE}.}
+\item{\code{seed} }{ A fixed seed for the number generator.}
 }}
 
 \item{rounding}{Optional. A string parameter to request a rounding method to be applied in the input polytope before volume computation: a) \code{'min_ellipsoid'}, b) \code{'svd'}, c) \code{'max_ellipsoid'} and d) \code{'none'} for no rounding.}

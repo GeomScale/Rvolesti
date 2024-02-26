@@ -43,8 +43,8 @@ FT factorial(FT n)
 //' vol = exact_vol(Z)
 //'
 //' \donttest{# compute the exact volume of a 2-d arbitrary simplex
-//' V = matrix(c(2,3,-1,7,0,0),ncol = 2, nrow = 3, byrow = TRUE)
-//' P = Vpolytope$new(V)
+//' A = matrix(c(2,3,-1,7,0,0),ncol = 2, nrow = 3, byrow = TRUE)
+//' P = Vpolytope(V = A)
 //' vol = exact_vol(P)
 //' }
 //'
@@ -53,7 +53,7 @@ FT factorial(FT n)
 //' vol = exact_vol(P)
 //' @export
 // [[Rcpp::export]]
-double exact_vol(Rcpp::Nullable<Rcpp::Reference> P) {
+double exact_vol(Rcpp::Reference P) {
 
     typedef double NT;
     typedef Cartesian <NT> Kernel;
@@ -61,21 +61,38 @@ double exact_vol(Rcpp::Nullable<Rcpp::Reference> P) {
     typedef Eigen::Matrix<NT, Eigen::Dynamic, 1> VT;
     typedef Eigen::Matrix <NT, Eigen::Dynamic, Eigen::Dynamic> MT;
 
-    if (NT(Rcpp::as<Rcpp::Reference>(P).field("volume")) > 0.0) {
-        return NT(Rcpp::as<Rcpp::Reference>(P).field("volume"));
+    if (NT(P.slot("volume")) > 0.0) {
+        return NT(P.slot("volume"));
     }
 
-    int type = Rcpp::as<Rcpp::Reference>(P).field("type"), dim;
+    int type;
+    int dim;
+    std::string type_str = Rcpp::as<std::string>(P.slot("type"));
+
+    if (type_str.compare(std::string("Hpolytope")) == 0) {
+        dim = Rcpp::as<MT>(P.slot("A")).cols();
+        type = 1;
+    } else if (type_str.compare(std::string("Vpolytope")) == 0) {
+        dim = Rcpp::as<MT>(P.slot("V")).cols();
+        type = 2;
+    } else if (type_str.compare(std::string("Zonotope")) == 0) {
+        dim = Rcpp::as<MT>(P.slot("G")).cols();
+        type = 3;
+    } else if (type_str.compare(std::string("VpolytopeIntersection")) == 0) {
+        dim = Rcpp::as<MT>(P.slot("V1")).cols();
+        type = 4;
+    } else {
+        throw Rcpp::exception("Unknown polytope representation!");
+    }
+
     NT vol;
 
     if (type == 2) {
 
-        dim = Rcpp::as<Rcpp::Reference>(P).field("dimension");
+        if (Rcpp::as<MT>(P.slot("V")).rows() ==
+            Rcpp::as<MT>(P.slot("V")).cols() + 1) {
 
-        if (Rcpp::as<MT>(Rcpp::as<Rcpp::Reference>(P).field("V")).rows() ==
-            Rcpp::as<MT>(Rcpp::as<Rcpp::Reference>(P).field("V")).cols() + 1) {
-
-            MT V = Rcpp::as<MT>(Rcpp::as<Rcpp::Reference>(P).field("V")).transpose(), V2(dim,dim);
+            MT V = Rcpp::as<MT>(P.slot("V")).transpose(), V2(dim,dim);
             VT v0 = V.col(dim);
 
             for (int i = 0; i < dim; ++i) {
@@ -90,10 +107,8 @@ double exact_vol(Rcpp::Nullable<Rcpp::Reference> P) {
     } else if (type == 3) {
 
         typedef Zonotope<Point> zonotope;
-        dim = Rcpp::as<Rcpp::Reference>(P).field("dimension");
 
-        zonotope ZP(dim, Rcpp::as<MT>(Rcpp::as<Rcpp::Reference>(P).field("G")),
-                VT::Ones(Rcpp::as<MT>(Rcpp::as<Rcpp::Reference>(P).field("G")).rows()));
+        zonotope ZP(dim, Rcpp::as<MT>(P.slot("G")), VT::Ones(Rcpp::as<MT>(P.slot("G")).rows()));
         vol = exact_zonotope_vol<NT>(ZP);
 
     } else {
