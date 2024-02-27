@@ -184,7 +184,6 @@ std::pair<double, double> generic_volume(Polytope& P, RNGType &rng, unsigned int
 //' \item{\code{seed} }{ A fixed seed for the number generator.}
 //' }
 //' @param rounding Optional. A string parameter to request a rounding method to be applied in the input polytope before volume computation: a) \code{'min_ellipsoid'}, b) \code{'svd'}, c) \code{'max_ellipsoid'} and d) \code{'none'} for no rounding.
-//' @param seed Optional. A fixed seed for the number generator.
 //'
 //' @references \cite{I.Z.Emiris and V. Fisikopoulos,
 //' \dQuote{Practical polytope volume approximation,} \emph{ACM Trans. Math. Soft.,} 2018.},

@@ -21,8 +21,6 @@ volume(P, settings = NULL, rounding = NULL)
 }}
 
 \item{rounding}{Optional. A string parameter to request a rounding method to be applied in the input polytope before volume computation: a) \code{'min_ellipsoid'}, b) \code{'svd'}, c) \code{'max_ellipsoid'} and d) \code{'none'} for no rounding.}
-
-\item{seed}{Optional. A fixed seed for the number generator.}
 }
 \value{
 The approximation of the volume of a convex polytope.
