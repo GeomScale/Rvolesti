@@ -75,7 +75,9 @@ void run_ode_solver(
 //' @return A list which contains elements "x_1", ..., "x_n" representing each derivative results. Each "x_i" corresponds to a d x n matrix where each column represents a certain timestep of the solver.
 //'
 //' @examples
-//' # Please visit the examples directory on examples demonstrating usage of the ODE solvers.
+//' F <- function (x) (-x)
+//' initial_conditions <- list("x_1" = c(0), "x_2" = c(1))
+//' states <- ode_solve(dimension=1, n=1000, F=F, initial_time=0, step_size=0.01, order=2, method="leapfrog", initial_conditions=initial_conditions, domains = list())
 //'
 //' @export
 // [[Rcpp::export]]
