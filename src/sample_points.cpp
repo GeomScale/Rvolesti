@@ -477,15 +477,13 @@ Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
 
         functor_defined = false;
 
-        NT eta;
+        NT eta = NT(-1);
 
         if (Rcpp::as<Rcpp::List>(random_walk).containsElementNamed("step_size")) {
             eta = NT(Rcpp::as<NT>(Rcpp::as<Rcpp::List>(random_walk)["step_size"]));
             if (eta <= NT(0)) {
                 throw Rcpp::exception("Step size must be positive");
             }
-        } else {
-            eta = NT(-1);
         }
 
         if (Rcpp::as<Rcpp::List>(random_walk).containsElementNamed("solver")) {
