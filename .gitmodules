@@ -1,4 +1,3 @@
-[submodule "volesti_cran_include"]
-	path = src/include
+[submodule "src/volesti"]
+	path = src/volesti
 	url = https://github.com/GeomScale/volesti.git
-	branch = cran_include

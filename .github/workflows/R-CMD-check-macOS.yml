@@ -38,7 +38,11 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@v2
 
       - name: Fetch and update submodule
-        run: git submodule update --init --recursive
+        run: git submodule update --init --recursive;
+             cd src/volesti;
+             git config core.sparseCheckoutCone 'false';
+             git sparse-checkout disable;
+             git sparse-checkout set include external;
 
       - name: Install dependencies
         run: Rscript -e "install.packages(c('devtools', dependencies=TRUE))" -e "install.packages(c('rcmdcheck', 'devtools', 'Rcpp', 'RcppEigen', 'BH', 'testthat', 'downloader', 'xfun'))";
