@@ -1,16 +1,16 @@
-PKG_CPPFLAGS=-Ivolesti/external -Iexternal/lpSolve/src -Ivolesti/external/minimum_ellipsoid -Ivolesti/include -Ivolesti/include/convex_bodies/spectrahedra
+PKG_CPPFLAGS=-Iexternal -Iexternal/lpSolve/src -Iexternal/minimum_ellipsoid -Ivolesti/include -Ivolesti/include/convex_bodies/spectrahedra
 PKG_CXXFLAGS= -DBOOST_NO_AUTO_PTR -DDISABLE_NLP_ORACLES
 
-PKG_LIBS=-Lexternal/lpSolve/src -llp_solve -Lvolesti/external/PackedCSparse/qd -lqd $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+PKG_LIBS=-Lexternal/lpSolve/src -llp_solve -Lexternal/PackedCSparse/qd -lqd $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
-$(SHLIB): external/lpSolve/src/liblp_solve.a volesti/external/PackedCSparse/qd/libqd.a
+$(SHLIB): external/lpSolve/src/liblp_solve.a external/PackedCSparse/qd/libqd.a
 
 external/lpSolve/src/liblp_solve.a:
 	@(cd external/lpSolve/src && $(MAKE) liblp_solve.a \
     CC="$(CC)" CPPFLAGS="$(CPPFLAGS)" CFLAGS="$(CFLAGS)" \
     CPICFLAGS="$(CPICFLAGS)" AR="$(AR)" RANLIB="$(RANLIB)")
 
-volesti/external/PackedCSparse/qd/libqd.a:
-	@(cd volesti/external/PackedCSparse/qd && $(MAKE) libqd.a \
+external/PackedCSparse/qd/libqd.a:
+	@(cd external/PackedCSparse/qd && $(MAKE) libqd.a \
 		CC="$(CC)" CPPFLAGS="$(CPPFLAGS)" CFLAGS="$(CFLAGS)" \
 		CPICFLAGS="$(CPICFLAGS)" AR="$(AR)")
