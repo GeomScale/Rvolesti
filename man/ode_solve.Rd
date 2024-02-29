@@ -42,6 +42,8 @@ A list which contains elements "x_1", ..., "x_n" representing each derivative re
 Solve an ODE of the form dx^n / dt^n = F(x, t)
 }
 \examples{
-# Please visit the examples directory on examples demonstrating usage of the ODE solvers.
+F <- function (x) (-x)
+initial_conditions <- list("x_1" = c(0), "x_2" = c(1))
+states <- ode_solve(dimension=1, n=1000, F=F, initial_time=0, step_size=0.01, order=2, method="leapfrog", initial_conditions=initial_conditions, domains = list())
 
 }

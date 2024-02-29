@@ -23,8 +23,8 @@ Z = gen_rand_zonotope(2, 5)
 vol = exact_vol(Z)
 
 \donttest{# compute the exact volume of a 2-d arbitrary simplex
-V = matrix(c(2,3,-1,7,0,0),ncol = 2, nrow = 3, byrow = TRUE)
-P = Vpolytope$new(V)
+A = matrix(c(2,3,-1,7,0,0),ncol = 2, nrow = 3, byrow = TRUE)
+P = Vpolytope(V = A)
 vol = exact_vol(P)
 }
 

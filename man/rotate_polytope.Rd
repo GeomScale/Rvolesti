@@ -4,14 +4,12 @@
 \alias{rotate_polytope}
 \title{Apply a random rotation to a convex polytope (H-polytope, V-polytope, zonotope or intersection of two V-polytopes)}
 \usage{
-rotate_polytope(P, T = NULL, seed = NULL)
+rotate_polytope(P, rotation = list())
 }
 \arguments{
 \item{P}{A convex polytope. It is an object from class (a) Hpolytope, (b) Vpolytope, (c) Zonotope, (d) intersection of two V-polytopes.}
 
-\item{T}{Optional. A \eqn{d\times d} rotation matrix.}
-
-\item{seed}{Optional. A fixed seed for the random linear map generator.}
+\item{rotation}{A list that contains (a) the rotation matrix T and (b) the 'seed' to set a spesific seed for the number generator.}
 }
 \value{
 A list that contains the rotated polytope and the matrix \eqn{T} of the linear transformation.
@@ -20,7 +18,7 @@ A list that contains the rotated polytope and the matrix \eqn{T} of the linear t
 Given a convex H- or V- polytope or a zonotope or an intersection of two V-polytopes as input, this function applies (a) a random rotation or (b) a given rotation by an input matrix \eqn{T}.
 }
 \details{
-Let \eqn{P} be the given polytope and \eqn{Q} the rotated one and \eqn{T} be the matrix of the linear transformation. 
+Let \eqn{P} be the given polytope and \eqn{Q} the rotated one and \eqn{T} be the matrix of the linear transformation.
 \itemize{
 \item{If \eqn{P} is in H-representation and \eqn{A} is the matrix that contains the normal vectors of the facets of \eqn{Q} then \eqn{AT} contains the normal vactors of the facets of \eqn{P}.}
 \item{If \eqn{P} is in V-representation and \eqn{V} is the matrix that contains column-wise the vertices of \eqn{Q} then \eqn{T^TV} contains the vertices of \eqn{P}.}
@@ -30,7 +28,7 @@ Let \eqn{P} be the given polytope and \eqn{Q} the rotated one and \eqn{T} be the
 }
 \examples{
 # rotate a H-polytope (2d unit simplex)
-P = gen_simplex(2,'H')
+P = gen_simplex(2, 'H')
 poly_matrix_list = rotate_polytope(P)
 
 # rotate a V-polytope (3d cube)
@@ -38,6 +36,6 @@ P = gen_cube(3, 'V')
 poly_matrix_list = rotate_polytope(P)
 
 # rotate a 5-dimensional zonotope defined by the Minkowski sum of 15 segments
-Z = gen_rand_zonotope(3,6)
+Z = gen_rand_zonotope(3, 6)
 poly_matrix_list = rotate_polytope(Z)
 }
