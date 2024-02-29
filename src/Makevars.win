@@ -1,12 +1,12 @@
-PKG_CPPFLAGS=-Ivolesti/external -Ilpsolve/headers/run_headers -Ivolesti/external/minimum_ellipsoid -Ivolesti/include -Ivolesti/include/convex_bodies/spectrahedra
+PKG_CPPFLAGS=-Ivolesti/external -IlpSolve/src -Ivolesti/external/minimum_ellipsoid -Ivolesti/include -Ivolesti/include/convex_bodies/spectrahedra
 PKG_CXXFLAGS= -lm -ldl -DBOOST_NO_AUTO_PTR -DDISABLE_NLP_ORACLES
 
-PKG_LIBS=-Llpsolve/build/lp_solve -llp_solve -Lvolesti/external/PackedCSparse/qd -lqd $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+PKG_LIBS=-LlpSolve/src -llp_solve -Lvolesti/external/PackedCSparse/qd -lqd $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
-$(SHLIB): lpsolve/build/lp_solve/liblp_solve.a volesti/external/PackedCSparse/qd/libqd.a
+$(SHLIB): lpSolve/src/liblp_solve.a volesti/external/PackedCSparse/qd/libqd.a
 
-lpsolve/build/lp_solve/liblp_solve.a:
-	@(cd lpsolve/build/lp_solve && $(MAKE) liblp_solve.a \
+lpSolve/src/liblp_solve.a:
+	@(cd lpSolve/src && $(MAKE) liblp_solve.a \
     CC="$(CC)" CPPFLAGS="$(CPPFLAGS) -DUSRDLL -DINLINE=static" \
     CFLAGS="$(CFLAGS)" CPICFLAGS="$(CPICFLAGS)" AR="$(AR)" \
     RANLIB="$(RANLIB)")
