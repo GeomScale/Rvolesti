@@ -50,3 +50,15 @@
 # volesti 1.1.2-6
 
 - Fix UBSAN issues (lp_presolve)
+
+# volesti 1.2.0
+
+- New functions: dinvweibull_with_loc, ess, estimtate_lipschitz_constant, gen_birkhoff, geweke
+ode_solve, pinvweibull_with_loc, psrf_multivariate, psrf_univariate, raftery
+
+- New features in sample_points function:
+ a) new walks: i) Dikin walk, ii) Vaidya walk, iii) John walk,
+  iv) Hamiltonian Monte Carlo (HMC) for general logconcave densities
+  v) Underdamped Langevin Dynamics (ULD) for general logconcave densities (using the Randomized Midpoint Method)
+  vi) Exact Hamiltonian Monte Carlo with reflections (spherical Gaussian or exponential distribution)
+ b) new distributions: i) exponential, ii) general logconcave
