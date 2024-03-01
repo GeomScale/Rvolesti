@@ -39,7 +39,8 @@ P <- Hpolytope(A = Tr$Mat[1:nrow(Tr$Mat), 2:ncol(Tr$Mat)], b = Tr$Mat[,1])
 x_min = matrix(0, dimension, 1)
 
 # Warm start point from truncated Gaussian
-warm_start <- sample_points(P, n = 1, random_walk = list("nburns" = 5000), distribution = list("density" = "gaussian", "variance" = 1/2, "mode" = x_min))
+warm_start <- sample_points(P, n = 1, random_walk = list("nburns" = 5000),
+                            distribution = list("density" = "gaussian", "variance" = 1/2, "mode" = x_min))
 
 # Sample points
 n_samples <- 20000
