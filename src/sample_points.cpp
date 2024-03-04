@@ -24,6 +24,7 @@
 #include "ode_solvers/ode_solvers.hpp"
 #include "oracle_functors_rcpp.h"
 #include "preprocess/crhmc/constraint_problem.h"
+
 enum random_walks {
   ball_walk,
   rdhr,
@@ -57,7 +58,7 @@ void sample_from_polytope(Polytope &P, int type, RNGType &rng, PointList &randPo
                           unsigned int const& walkL, unsigned int const& numpoints,
                           bool const& gaussian, NT const& a, NT const& L, Point const& c,
                           Point const& StartingPoint, unsigned int const& nburns,
-                          bool const& set_L, NT const& eta, random_walks walk,
+                          bool const& set_L, random_walks walk,
                           NegativeGradientFunctor *F=NULL, NegativeLogprobFunctor *f=NULL,
                           HessianFunctor *h=NULL, ode_solvers solver_type = no_solver)
 {
@@ -217,7 +218,8 @@ void sample_from_polytope(Polytope &P, int type, RNGType &rng, PointList &randPo
 
       break;
     case crhmc:{
-      execute_crhmc<Polytope, RNGType, PointList, NegativeGradientFunctor,NegativeLogprobFunctor, HessianFunctor, CRHMCWalk, 8>(P, rng, randPoints, walkL, numpoints, nburns, F, f, h);
+      execute_crhmc<Polytope, RNGType, PointList, NegativeGradientFunctor,NegativeLogprobFunctor,
+                    HessianFunctor, CRHMCWalk, 8>(P, rng, randPoints, walkL, numpoints, nburns, F, f, h);
       break;
       }
     case nuts:
@@ -288,7 +290,7 @@ void sample_from_polytope(Polytope &P, int type, RNGType &rng, PointList &randPo
 //' \item{\code{BaW_rad} }{ The radius for the ball walk.}
 //' \item{\code{L} }{ The maximum length of the billiard trajectory or the radius for the step of dikin, vaidya or john walk.}
 //' \item{\code{solver} }{ Specify ODE solver for logconcave sampling. Options are i) leapfrog, ii) euler iii) runge-kutta iv) richardson}
-//' \item{\code{step_size }{ Optionally chosen step size for logconcave sampling. Defaults to a theoretical value if not provided.}
+//' \item{\code{step_size} }{ Optionally chosen step size for logconcave sampling. Defaults to a theoretical value if not provided.}
 //' }
 //' @param distribution Optional. A list that declares the target density and some related parameters as follows:
 //' \itemize{
@@ -330,7 +332,7 @@ void sample_from_polytope(Polytope &P, int type, RNGType &rng, PointList &randPo
 //' # gaussian distribution from the 2d unit simplex in H-representation with variance = 2
 //' A = matrix(c(-1,0,0,-1,1,1), ncol=2, nrow=3, byrow=TRUE)
 //' b = c(0,0,1)
-//' P = Hpolytope$new(A,b)
+//' P = Hpolytope(A=A,b=b)
 //' points = sample_points(P, n = 100, distribution = list("density" = "gaussian", "variance" = 2))
 //'
 //' # uniform points from the boundary of a 2-dimensional random H-polytope
@@ -341,7 +343,7 @@ void sample_from_polytope(Polytope &P, int type, RNGType &rng, PointList &randPo
 //'
 //' @export
 // [[Rcpp::export]]
-Rcpp::NumericMatrix sample_points(Rcpp::Nullable<Rcpp::Reference> P,
+Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
                                   Rcpp::Nullable<unsigned int> n,
                                   Rcpp::Nullable<Rcpp::List> random_walk = R_NilValue,
                                   Rcpp::Nullable<Rcpp::List> distribution = R_NilValue,
@@ -360,9 +362,6 @@ Rcpp::NumericMatrix sample_points(Rcpp::Nullable<Rcpp::Reference> P,
     typedef Eigen::SparseMatrix<NT> SpMat;
     typedef constraint_problem<SpMat,Point> sparse_problem;
 
-    unsigned int type = Rcpp::as<Rcpp::Reference>(P).field("type"), dim = Rcpp::as<Rcpp::Reference>(P).field("dimension"),
-          walkL = 1, numpoints, nburns = 0;
-
     RcppFunctor::GradientFunctor<Point> *F = NULL;
     RcppFunctor::FunctionFunctor<Point> *f = NULL;
     RcppFunctor::HessianFunctor<Point> *h = NULL;
@@ -371,6 +370,34 @@ Rcpp::NumericMatrix sample_points(Rcpp::Nullable<Rcpp::Reference> P,
     GaussianFunctor::FunctionFunctor<Point> *g = NULL;
     GaussianFunctor::HessianFunctor<Point> *hess_g = NULL;
     bool functor_defined = true;
+
+    unsigned int dim;
+    unsigned int type;
+
+    std::string type_str = Rcpp::as<std::string>(P.slot("type"));
+
+    if (type_str.compare(std::string("Hpolytope")) == 0) {
+        dim = Rcpp::as<MT>(P.slot("A")).cols();
+        type = 1;
+    } else if (type_str.compare(std::string("Vpolytope")) == 0) {
+        dim = Rcpp::as<MT>(P.slot("V")).cols();
+        type = 2;
+    } else if (type_str.compare(std::string("Zonotope")) == 0) {
+        dim = Rcpp::as<MT>(P.slot("G")).cols();
+        type = 3;
+    } else if (type_str.compare(std::string("VpolytopeIntersection")) == 0) {
+        dim = Rcpp::as<MT>(P.slot("V1")).cols();
+        type = 4;
+    } else if (type_str.compare(std::string("HpolytopeSparse")) == 0) {
+        dim = Rcpp::as<SpMat>(P.slot("Aineq")).cols();
+        type = 5;
+    } else {
+        throw Rcpp::exception("Unknown polytope representation!");
+    }
+
+    unsigned int numpoints;
+    unsigned int nburns = 0;
+    unsigned int walkL = 1;
 
 
     RNGType rng(dim);
@@ -668,8 +695,7 @@ Rcpp::NumericMatrix sample_points(Rcpp::Nullable<Rcpp::Reference> P,
     switch(type) {
         case 1: {
             // Hpolytope
-            Hpolytope HP(dim, Rcpp::as<MT>(Rcpp::as<Rcpp::Reference>(P).field("A")),
-                    Rcpp::as<VT>(Rcpp::as<Rcpp::Reference>(P).field("b")));
+            Hpolytope HP(dim, Rcpp::as<MT>(P.slot("A")), Rcpp::as<VT>(P.slot("b")));
 
             InnerBall = HP.ComputeInnerBall();
             if (InnerBall.second < 0.0) throw Rcpp::exception("Unable to compute a feasible point.");
@@ -686,18 +712,17 @@ Rcpp::NumericMatrix sample_points(Rcpp::Nullable<Rcpp::Reference> P,
             }
             if (functor_defined) {
                 sample_from_polytope(HP, type, rng, randPoints, walkL, numpoints, gaussian, a, L, c,
-                    StartingPoint, nburns, set_L, eta, walk, F, f, h, solver);
+                    StartingPoint, nburns, set_L, walk, F, f, h, solver);
             }
             else {
                 sample_from_polytope(HP, type, rng, randPoints, walkL, numpoints, gaussian, a, L, c,
-                    StartingPoint, nburns, set_L, eta, walk, G, g, hess_g, solver);
+                    StartingPoint, nburns, set_L, walk, G, g, hess_g, solver);
             }
             break;
         }
         case 2: {
             // Vpolytope
-            Vpolytope VP(dim, Rcpp::as<MT>(Rcpp::as<Rcpp::Reference>(P).field("V")),
-                    VT::Ones(Rcpp::as<MT>(Rcpp::as<Rcpp::Reference>(P).field("V")).rows()));
+            Vpolytope VP(dim, Rcpp::as<MT>(P.slot("V")), VT::Ones(Rcpp::as<MT>(P.slot("V")).rows()));
 
             InnerBall = VP.ComputeInnerBall();
             if (InnerBall.second < 0.0) throw Rcpp::exception("Unable to compute a feasible point.");
@@ -712,13 +737,12 @@ Rcpp::NumericMatrix sample_points(Rcpp::Nullable<Rcpp::Reference> P,
                 VP.shift(mode.getCoefficients());
             }
             sample_from_polytope(VP, type, rng, randPoints, walkL, numpoints, gaussian, a, L, c,
-                                 StartingPoint, nburns, set_L, eta, walk, F, f, h, solver);
+                                 StartingPoint, nburns, set_L, walk, F, f, h, solver);
             break;
         }
         case 3: {
             // Zonotope
-            zonotope ZP(dim, Rcpp::as<MT>(Rcpp::as<Rcpp::Reference>(P).field("G")),
-                    VT::Ones(Rcpp::as<MT>(Rcpp::as<Rcpp::Reference>(P).field("G")).rows()));
+            zonotope ZP(dim, Rcpp::as<MT>(P.slot("G")), VT::Ones(Rcpp::as<MT>(P.slot("G")).rows()));
 
             InnerBall = ZP.ComputeInnerBall();
             if (InnerBall.second < 0.0) throw Rcpp::exception("Unable to compute a feasible point.");
@@ -733,15 +757,15 @@ Rcpp::NumericMatrix sample_points(Rcpp::Nullable<Rcpp::Reference> P,
                 ZP.shift(mode.getCoefficients());
             }
             sample_from_polytope(ZP, type, rng, randPoints, walkL, numpoints, gaussian, a, L, c,
-                                 StartingPoint, nburns, set_L, eta, walk, F, f, h, solver);
+                                 StartingPoint, nburns, set_L, walk, F, f, h, solver);
             break;
         }
         case 4: {
             // Intersection of two V-polytopes
-            Vpolytope VP1(dim, Rcpp::as<MT>(Rcpp::as<Rcpp::Reference>(P).field("V1")),
-                     VT::Ones(Rcpp::as<MT>(Rcpp::as<Rcpp::Reference>(P).field("V1")).rows()));
-            Vpolytope VP2(dim, Rcpp::as<MT>(Rcpp::as<Rcpp::Reference>(P).field("V2")),
-                     VT::Ones(Rcpp::as<MT>(Rcpp::as<Rcpp::Reference>(P).field("V2")).rows()));
+            Vpolytope VP1(dim, Rcpp::as<MT>(P.slot("V1")),
+                     VT::Ones(Rcpp::as<MT>(P.slot("V1")).rows()));
+            Vpolytope VP2(dim, Rcpp::as<MT>(P.slot("V2")),
+                     VT::Ones(Rcpp::as<MT>(P.slot("V2")).rows()));
             InterVP VPcVP(VP1, VP2);
 
             if (!VPcVP.is_feasible()) throw Rcpp::exception("Empty set!");
@@ -756,26 +780,30 @@ Rcpp::NumericMatrix sample_points(Rcpp::Nullable<Rcpp::Reference> P,
                 VPcVP.shift(mode.getCoefficients());
             }
             sample_from_polytope(VPcVP, type, rng, randPoints, walkL, numpoints, gaussian, a, L, c,
-                                 StartingPoint, nburns, set_L, eta, walk, F, f, h, solver);
+                                 StartingPoint, nburns, set_L, walk, F, f, h, solver);
             break;
         }
         case 5: {
-          // Sparse constraint_problem
-          SpMat Aeq = Rcpp::as<SpMat>(Rcpp::as<Rcpp::Reference>(P).field("Aeq"));
-          VT beq=  Rcpp::as<VT>(Rcpp::as<Rcpp::Reference>(P).field("beq"));
-          SpMat Aineq = Rcpp::as<SpMat>(Rcpp::as<Rcpp::Reference>(P).field("Aineq"));
-          VT bineq= Rcpp::as<VT>(Rcpp::as<Rcpp::Reference>(P).field("bineq"));
-          VT lb=  Rcpp::as<VT>(Rcpp::as<Rcpp::Reference>(P).field("lb"));
-          VT ub=  Rcpp::as<VT>(Rcpp::as<Rcpp::Reference>(P).field("ub"));
-           sparse_problem problem(dim, Aeq, beq, Aineq, bineq, lb, ub);
-           if(walk!=crhmc){throw Rcpp::exception("Sparse problems are supported only by the CRHMC walk.");}
-           if (functor_defined) {
-             execute_crhmc<sparse_problem, RNGType, std::list<Point>, RcppFunctor::GradientFunctor<Point>,RcppFunctor::FunctionFunctor<Point>, RcppFunctor::HessianFunctor<Point>, CRHMCWalk, 8>(problem, rng, randPoints, walkL, numpoints, nburns, F, f, h);
-           }
-           else {
-             execute_crhmc<sparse_problem, RNGType, std::list<Point>, GaussianFunctor::GradientFunctor<Point>,GaussianFunctor::FunctionFunctor<Point>, GaussianFunctor::HessianFunctor<Point>, CRHMCWalk, 8>(problem, rng, randPoints, walkL, numpoints, nburns, G, g, hess_g);
-           }
-           break;
+            // Sparse constraint_problem
+            SpMat Aeq = Rcpp::as<SpMat>(P.slot("Aeq"));
+            VT beq=  Rcpp::as<VT>(P.slot("beq"));
+            SpMat Aineq = Rcpp::as<SpMat>(P.slot("Aineq"));
+            VT bineq= Rcpp::as<VT>(P.slot("bineq"));
+            VT lb=  Rcpp::as<VT>(P.slot("lb"));
+            VT ub=  Rcpp::as<VT>(P.slot("ub"));
+            sparse_problem problem(dim, Aeq, beq, Aineq, bineq, lb, ub);
+            if(walk!=crhmc){throw Rcpp::exception("Sparse problems are supported only by the CRHMC walk.");}
+            if (functor_defined) {
+                execute_crhmc<sparse_problem, RNGType, std::list<Point>, RcppFunctor::GradientFunctor<Point>,
+                              RcppFunctor::FunctionFunctor<Point>, RcppFunctor::HessianFunctor<Point>, CRHMCWalk, 1>
+                              (problem, rng, randPoints, walkL, numpoints, nburns, F, f, h);
+            }
+            else {
+                execute_crhmc<sparse_problem, RNGType, std::list<Point>, GaussianFunctor::GradientFunctor<Point>,
+                              GaussianFunctor::FunctionFunctor<Point>, GaussianFunctor::HessianFunctor<Point>, CRHMCWalk, 1>
+                              (problem, rng, randPoints, walkL, numpoints, nburns, G, g, hess_g);
+            }
+            break;
         }
     }
 

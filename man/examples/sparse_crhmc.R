@@ -31,7 +31,7 @@ A = matrix(c(1, -1), ncol=1, nrow=2, byrow=TRUE)
 b = c(2,1)
 
 # Create domain of truncation
-P <- volesti::Hpolytope$new(A, b)
+P <- volesti::Hpolytope(A=A, b=b)
 
 # Mode of logconcave density
 x_min <- c(-0.5)
@@ -41,7 +41,7 @@ L <- 2
 m <- 2
 
 # Sample points
-n_samples <- 80000
+n_samples <- 1000
 n_burns <- n_samples / 2
 cat("---Sampling without hessian\n")
 pts <- sample_points(P, n = n_samples, random_walk = list("walk" = "CRHMC", "step_size" = 0.3, "nburns" = n_burns, "walk_length" = 1, "solver" = "implicit_midpoint"), distribution = list("density" = "logconcave", "negative_logprob" = f, "negative_logprob_gradient" = grad_f, "L_" = L, "m" = m))
@@ -79,16 +79,16 @@ invisible(capture.output(dev.off()))
 
 walk="CRHMC"
 library(Matrix)
-bineq=matrix(c(10,10,10,10,10), nrow=5, ncol=1, byrow=TRUE)
+bineq=c(10,10,10,10,10)
 Aineq = matrix(c(1,0,-0.25,-1,2.5,1,0.4,-1,-0.9,0.5), nrow=5, ncol=2, byrow = TRUE)
 Aineq = as( Aineq, 'dgCMatrix' )
-beq=matrix(,nrow=0, ncol=1, byrow=TRUE)
+beq=(0)
 Aeq = matrix(, nrow=0, ncol=2, byrow = TRUE)
 Aeq=as( Aeq, 'dgCMatrix' )
 lb=-100000*c(1,1);
 ub=100000*c(1,1);
 cat("---Sampling the normal distribution in a pentagon\n")
-P <- volesti::sparse_constraint_problem$new(Aineq, bineq,Aeq, beq, lb, ub)
+P <- volesti::HpolytopeSparse(Aineq=Aineq, bineq=bineq, Aeq=Aeq, beq=beq, lb=lb, ub=ub)
 points <- sample_points(P, n = n_samples, random_walk = list("walk" = "CRHMC", "step_size" = 0.3, "nburns" = n_burns, "walk_length" = 1, "solver" = "implicit_midpoint"), distribution = list("density" = "logconcave", "variance" = 8))
 jpeg("pentagon.jpg")
 plot(ggplot(data.frame( x=points[1,], y=points[2,] )) +

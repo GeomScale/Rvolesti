@@ -25,8 +25,8 @@ f <- function(x) (norm_vec(x)^2 + sum(x))
 # Negative log-probability gradient oracle
 grad_f <- function(x) (2 * x + 1)
 
-dimension <- 50
-facets <- 200
+dimension <- 5
+facets <- 20
 
 # Create domain of truncation
 H <- gen_rand_hpoly(dimension, facets)
