@@ -1,5 +1,5 @@
 PKG_CPPFLAGS=-Iexternal -Iexternal/lpSolve/src -Iexternal/minimum_ellipsoid -Ivolesti/include -Ivolesti/include/convex_bodies/spectrahedra
-PKG_CXXFLAGS= -DBOOST_NO_AUTO_PTR -DDISABLE_NLP_ORACLES -Wno-deprecated-declarations -lm -ldl -Wno-ignored-attributes
+PKG_CXXFLAGS= -DBOOST_NO_AUTO_PTR -DDISABLE_NLP_ORACLES
 
 PKG_LIBS=-Lexternal/lpSolve/src -llp_solve -Lexternal/PackedCSparse/qd -lqd $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 

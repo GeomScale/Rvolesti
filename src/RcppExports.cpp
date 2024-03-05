@@ -110,25 +110,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// ode_solve
-Rcpp::List ode_solve(Rcpp::Nullable<unsigned int> n, Rcpp::Nullable<double> step_size, Rcpp::Nullable<unsigned int> order, Rcpp::Nullable<unsigned int> dimension, Rcpp::Nullable<double> initial_time, Rcpp::Function F, Rcpp::Nullable<Rcpp::CharacterVector> method, Rcpp::Nullable<Rcpp::List> domains, Rcpp::Nullable<Rcpp::List> initial_conditions);
-RcppExport SEXP _volesti_ode_solve(SEXP nSEXP, SEXP step_sizeSEXP, SEXP orderSEXP, SEXP dimensionSEXP, SEXP initial_timeSEXP, SEXP FSEXP, SEXP methodSEXP, SEXP domainsSEXP, SEXP initial_conditionsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::Nullable<unsigned int> >::type n(nSEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<double> >::type step_size(step_sizeSEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<unsigned int> >::type order(orderSEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<unsigned int> >::type dimension(dimensionSEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<double> >::type initial_time(initial_timeSEXP);
-    Rcpp::traits::input_parameter< Rcpp::Function >::type F(FSEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::CharacterVector> >::type method(methodSEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::List> >::type domains(domainsSEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::List> >::type initial_conditions(initial_conditionsSEXP);
-    rcpp_result_gen = Rcpp::wrap(ode_solve(n, step_size, order, dimension, initial_time, F, method, domains, initial_conditions));
-    return rcpp_result_gen;
-END_RCPP
-}
 // poly_gen
 Rcpp::NumericMatrix poly_gen(int kind_gen, bool Vpoly_gen, bool Zono_gen, int dim_gen, int m_gen, Rcpp::Nullable<double> seed);
 RcppExport SEXP _volesti_poly_gen(SEXP kind_genSEXP, SEXP Vpoly_genSEXP, SEXP Zono_genSEXP, SEXP dim_genSEXP, SEXP m_genSEXP, SEXP seedSEXP) {
@@ -223,29 +204,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// writeSdpaFormatFile
-void writeSdpaFormatFile(Rcpp::Reference spectrahedron, Rcpp::Nullable<Rcpp::NumericVector> objectiveFunction, Rcpp::Nullable<std::string> outputFile);
-RcppExport SEXP _volesti_writeSdpaFormatFile(SEXP spectrahedronSEXP, SEXP objectiveFunctionSEXP, SEXP outputFileSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::Reference >::type spectrahedron(spectrahedronSEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type objectiveFunction(objectiveFunctionSEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<std::string> >::type outputFile(outputFileSEXP);
-    writeSdpaFormatFile(spectrahedron, objectiveFunction, outputFile);
-    return R_NilValue;
-END_RCPP
-}
-// loadSdpaFormatFile
-Rcpp::List loadSdpaFormatFile(Rcpp::Nullable<std::string> inputFile);
-RcppExport SEXP _volesti_loadSdpaFormatFile(SEXP inputFileSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::Nullable<std::string> >::type inputFile(inputFileSEXP);
-    rcpp_result_gen = Rcpp::wrap(loadSdpaFormatFile(inputFile));
-    return rcpp_result_gen;
-END_RCPP
-}
 // volume
 Rcpp::List volume(Rcpp::Reference P, Rcpp::Nullable<Rcpp::List> settings, Rcpp::Nullable<std::string> rounding);
 RcppExport SEXP _volesti_volume(SEXP PSEXP, SEXP settingsSEXP, SEXP roundingSEXP) {
@@ -295,7 +253,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_volesti_geweke", (DL_FUNC) &_volesti_geweke, 3},
     {"_volesti_inner_ball", (DL_FUNC) &_volesti_inner_ball, 2},
     {"_volesti_load_sdpa_format_file", (DL_FUNC) &_volesti_load_sdpa_format_file, 1},
-    {"_volesti_ode_solve", (DL_FUNC) &_volesti_ode_solve, 9},
     {"_volesti_poly_gen", (DL_FUNC) &_volesti_poly_gen, 6},
     {"_volesti_psrf_multivariate", (DL_FUNC) &_volesti_psrf_multivariate, 1},
     {"_volesti_psrf_univariate", (DL_FUNC) &_volesti_psrf_univariate, 2},
@@ -303,8 +260,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_volesti_rotating", (DL_FUNC) &_volesti_rotating, 3},
     {"_volesti_rounding", (DL_FUNC) &_volesti_rounding, 3},
     {"_volesti_sample_points", (DL_FUNC) &_volesti_sample_points, 5},
-    {"_volesti_writeSdpaFormatFile", (DL_FUNC) &_volesti_writeSdpaFormatFile, 3},
-    {"_volesti_loadSdpaFormatFile", (DL_FUNC) &_volesti_loadSdpaFormatFile, 1},
     {"_volesti_volume", (DL_FUNC) &_volesti_volume, 3},
     {"_volesti_write_sdpa_format_file", (DL_FUNC) &_volesti_write_sdpa_format_file, 3},
     {"_volesti_zono_approx", (DL_FUNC) &_volesti_zono_approx, 4},

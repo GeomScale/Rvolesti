@@ -1,26 +1,41 @@
-#' An R class to represent an H-polytope
+#' An R class to represent an H-polytope defined by a sparse matrix
 #'
-#' An H-polytope is a convex polytope defined by a set of linear inequalities or equivalently a \eqn{d}-dimensional H-polytope with \eqn{m} facets is defined by a \eqn{m\times d} matrix A and a \eqn{m}-dimensional vector b, s.t.: \eqn{Ax\leq b}.
+#' A sparse H-polytope is a convex polytope defined by a set of linear inequalities or equivalently a
+#' \eqn{d}-dimensional H-polytope with \eqn{m} facets is defined by a \eqn{m\times d} matrix A and
+#' a \eqn{m}-dimensional vector b, s.t.: \eqn{Ax\leq b}, where $A$ is sparse.
 #'
 #' \describe{
-#'    \item{A}{An \eqn{m\times d} numerical matrix.}
+#'    \item{Aineq}{An \eqn{m\times d} sparse numerical matrix for the inequalities.}
 #'
-#'    \item{b}{An \eqn{m}-dimensional vector b.}
+#'    \item{bineq}{An \eqn{m}-dimensional vector for the ineqaulities.}
 #'
-#'    \item{volume}{The volume of the polytope if it is known, \eqn{NaN} otherwise by default.}
+#'    \item{Aineq}{An \eqn{m'\times d} sparse numerical matrix for the equalities.}
 #'
-#'    \item{type}{A character with default value 'Hpolytope', to declare the representation of the polytope.}
+#'    \item{bineq}{An \eqn{m'}-dimensional vector for the eqaulities.}
+#'
+#'    \item{lb}{\eqn{d}-dimensional vector lb.}
+#'
+#'    \item{ub}{\eqn{d}-dimensional vector ub.}
+#'
+#'    \item{type}{A character with default value 'HpolytopeSparse', to declare the representation of the polytope.}
 #' }
 #'
 #' @examples
-#' A = matrix(c(-1,0,0,-1,1,1), ncol=2, nrow=3, byrow=TRUE)
-#' b = c(0,0,1)
-#' P = Hpolytope(A = A, b = b)
+#' library(Matrix)
+#' bineq=c(10,10,10,10,10)
+#' Aineq = matrix(c(1,0,-0.25,-1,2.5,1,0.4,-1,-0.9,0.5), nrow=5, ncol=2, byrow = TRUE)
+#' Aineq = as( Aineq, 'dgCMatrix' )
+#' beq=(0)
+#' Aeq = matrix(, nrow=0, ncol=2, byrow = TRUE)
+#' Aeq=as( Aeq, 'dgCMatrix' )
+#' lb=-100000*c(1,1);
+#' ub=100000*c(1,1);
+#' P <- HpolytopeSparse(Aineq = Aineq, bineq = bineq, Aeq = Aeq, beq = beq, lb = lb, ub = ub)
 #'
 #' @name HpolytopeSparse-class
 #' @rdname HpolytopeSparse-class
 #' @exportClass HpolytopeSparse
-library(Matrix)
+#' @importFrom "Matrix" "CsparseMatrix"
 HpolytopeSparse <- setClass (
   # Class name
   "HpolytopeSparse",
@@ -33,19 +48,17 @@ HpolytopeSparse <- setClass (
     beq = "numeric",
     lb = "numeric",
     ub = "numeric",
-    dimension = "numeric",
     type = "character"
     ),
 
   # Initializing slots
   prototype = list(
-    Aineq = as(0, "CsparseMatrix"),
-    bineq = as.numeric(NULL),
-    Aeq = as(0, "CsparseMatrix"),
-    beq = as.numeric(NULL),
-    lb = as.numeric(NULL),
-    ub = as.numeric(NULL),
-    dimension = as.numeric(NaN),
+    Aineq = Matrix::sparseMatrix(i = integer(0), j = integer(0), x = double(0), dims = c(0, 0)),
+    bineq = numeric(0),
+    Aeq = Matrix::sparseMatrix(i = integer(0), j = integer(0), x = double(0), dims = c(0, 0)),
+    beq = numeric(0),
+    lb = numeric(0),
+    ub = numeric(0),
     type = "HpolytopeSparse"
   )
 )
