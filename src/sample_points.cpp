@@ -65,12 +65,12 @@ void sample_from_polytope(Polytope &P, int type, RNGType &rng, PointList &randPo
     switch (walk)
     {
     case bcdhr:
-        uniform_sampling_boundary <BCDHRWalk>(randPoints, P, rng, walkL, numpoints,
-                                              StartingPoint, nburns);
+        uniform_sampling_boundary<BCDHRWalk>(randPoints, P, rng, walkL, numpoints,
+                                             StartingPoint, nburns);
         break;
     case brdhr:
-        uniform_sampling_boundary <BRDHRWalk>(randPoints, P, rng, walkL, numpoints,
-                                              StartingPoint, nburns);
+        uniform_sampling_boundary<BRDHRWalk>(randPoints, P, rng, walkL, numpoints,
+                                             StartingPoint, nburns);
         break;
     case cdhr:
         if(gaussian) {
@@ -88,15 +88,6 @@ void sample_from_polytope(Polytope &P, int type, RNGType &rng, PointList &randPo
         } else {
             uniform_sampling<RDHRWalk>(randPoints, P, rng, walkL, numpoints,
                                        StartingPoint, nburns);
-        }
-        break;
-    case gaussian_hmc:
-        if(set_L) {
-            GaussianHamiltonianMonteCarloExactWalk WalkType(L);
-            gaussian_sampling(randPoints, P, rng, WalkType, walkL, numpoints, a, StartingPoint, nburns);
-        } else {
-            gaussian_sampling<GaussianHamiltonianMonteCarloExactWalk>(randPoints, P, rng, walkL, numpoints, a,
-                                                                      StartingPoint, nburns);
         }
         break;
     case vaidya_walk:
@@ -144,13 +135,23 @@ void sample_from_polytope(Polytope &P, int type, RNGType &rng, PointList &randPo
                                                       StartingPoint, nburns);
         }
         break;
+    case gaussian_hmc:
+        if(set_L) {
+            GaussianHamiltonianMonteCarloExactWalk WalkType(L);
+            gaussian_sampling(randPoints, P, rng, WalkType, walkL, numpoints, a, StartingPoint, nburns);
+        } else {
+            gaussian_sampling<GaussianHamiltonianMonteCarloExactWalk>(randPoints, P, rng, walkL,
+                numpoints, a, StartingPoint, nburns);
+        }
+        break;
     case exponential_hmc:
         if (set_L) {
             ExponentialHamiltonianMonteCarloExactWalk WalkType(L);
-            exponential_sampling(randPoints, P, rng, WalkType, walkL, numpoints, c, a, StartingPoint, nburns);
+            exponential_sampling(randPoints, P, rng, WalkType, walkL, numpoints, c, a, StartingPoint,
+                nburns);
         } else {
-            exponential_sampling<ExponentialHamiltonianMonteCarloExactWalk>(randPoints, P, rng, walkL, numpoints, c, a,
-                                                                            StartingPoint, nburns);
+            exponential_sampling<ExponentialHamiltonianMonteCarloExactWalk>(randPoints, P, rng, walkL,
+                numpoints, c, a, StartingPoint, nburns);
         }
         break;
     case ball_walk:
@@ -165,7 +166,7 @@ void sample_from_polytope(Polytope &P, int type, RNGType &rng, PointList &randPo
                                  StartingPoint, nburns);
             }
         } else {
-            if(gaussian) {
+            if (gaussian) {
                 gaussian_sampling<GaussianBallWalk>(randPoints, P, rng, walkL, numpoints,
                                                     a, StartingPoint, nburns);
             } else {
@@ -175,96 +176,47 @@ void sample_from_polytope(Polytope &P, int type, RNGType &rng, PointList &randPo
         }
         break;
     case hmc:
-      switch (solver_type) {
-          case leapfrog:
-            logconcave_sampling <
-              PointList,
-              Polytope,
-              RNGType,
-              HamiltonianMonteCarloWalk,
-              NT,
-              Point,
-              NegativeGradientFunctor,
-              NegativeLogprobFunctor,
-              LeapfrogODESolver <
-                Point,
-                NT,
-                Polytope,
-                NegativeGradientFunctor
-              >
-            >(randPoints, P, rng, walkL, numpoints, StartingPoint, nburns, *F, *f);
-            break;
-          case euler:
-            logconcave_sampling <
-              PointList,
-              Polytope,
-              RNGType,
-              HamiltonianMonteCarloWalk,
-              NT,
-              Point,
-              NegativeGradientFunctor,
-              NegativeLogprobFunctor,
-              EulerODESolver <
-                Point,
-                NT,
-                Polytope,
-                NegativeGradientFunctor
-              >
-            >(randPoints, P, rng, walkL, numpoints, StartingPoint, nburns, *F, *f);
-            break;
-          default:
-            break;
-      }
-
-      break;
-    case crhmc:{
-      execute_crhmc<Polytope, RNGType, PointList, NegativeGradientFunctor,NegativeLogprobFunctor,
-                    HessianFunctor, CRHMCWalk, 8>(P, rng, randPoints, walkL, numpoints, nburns, F, f, h);
-      break;
-      }
+        if (solver_type == leapfrog) {
+            logconcave_sampling<PointList, Polytope, RNGType, HamiltonianMonteCarloWalk, NT, Point,
+                                NegativeGradientFunctor, NegativeLogprobFunctor,
+                                LeapfrogODESolver<Point, NT, Polytope, NegativeGradientFunctor>
+                >(randPoints, P, rng, walkL, numpoints, StartingPoint, nburns, *F, *f);
+        }
+        if (solver_type == euler) {
+            logconcave_sampling<PointList, Polytope, RNGType, HamiltonianMonteCarloWalk, NT, Point,
+                                NegativeGradientFunctor, NegativeLogprobFunctor,
+                                EulerODESolver<Point, NT, Polytope, NegativeGradientFunctor>
+                >(randPoints, P, rng, walkL, numpoints, StartingPoint, nburns, *F, *f);
+        }
+        break;
     case nuts:
-
-      logconcave_sampling <
-              PointList,
-              Polytope,
-              RNGType,
-              NutsHamiltonianMonteCarloWalk,
-              NT,
-              Point,
-              NegativeGradientFunctor,
-              NegativeLogprobFunctor,
-              LeapfrogODESolver <
-                Point,
-                NT,
-                Polytope,
-                NegativeGradientFunctor
-              >
+        logconcave_sampling<PointList, Polytope, RNGType, NutsHamiltonianMonteCarloWalk, NT, Point,
+                            NegativeGradientFunctor, NegativeLogprobFunctor,
+                            LeapfrogODESolver<Point, NT, Polytope, NegativeGradientFunctor>
             >(randPoints, P, rng, walkL, numpoints, StartingPoint, nburns, *F, *f);
-
         break;
     case uld:
-
-      logconcave_sampling <
-        PointList,
-        Polytope,
-        RNGType,
-        UnderdampedLangevinWalk,
-        NT,
-        Point,
-        NegativeGradientFunctor,
-        NegativeLogprobFunctor,
-        LeapfrogODESolver <
-          Point,
-          NT,
-          Polytope,
-          NegativeGradientFunctor
-        >
-      >(randPoints, P, rng, walkL, numpoints, StartingPoint, nburns, *F, *f);
-
-      break;
+        logconcave_sampling<PointList, Polytope, RNGType, UnderdampedLangevinWalk, NT, Point,
+                            NegativeGradientFunctor, NegativeLogprobFunctor,
+                            LeapfrogODESolver<Point, NT, Polytope, NegativeGradientFunctor>
+            >(randPoints, P, rng, walkL, numpoints, StartingPoint, nburns, *F, *f);
+        break;
+    case crhmc:
+        execute_crhmc<Polytope, RNGType, PointList, NegativeGradientFunctor,NegativeLogprobFunctor,
+                      HessianFunctor, CRHMCWalk, 1
+            >(P, rng, randPoints, walkL, numpoints, nburns, F, f, h);
+        break;
     default:
         throw Rcpp::exception("Unknown random walk!");
     }
+}
+
+bool is_density(Rcpp::Nullable<Rcpp::List> distribution, std::string str) {
+    return Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(distribution)["density"]).compare(str) == 0;
+}
+
+bool is_walk(Rcpp::Nullable<Rcpp::List> random_walk, std::string str) {
+    return Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(random_walk)["walk"]).compare(str) == 0 ;
 }
 
 //' Sample uniformly, normally distributed, or logconcave distributed points from a convex Polytope (H-polytope, V-polytope, zonotope or intersection of two V-polytopes).
@@ -369,7 +321,6 @@ Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
     GaussianFunctor::GradientFunctor<Point> *G = NULL;
     GaussianFunctor::FunctionFunctor<Point> *g = NULL;
     GaussianFunctor::HessianFunctor<Point> *hess_g = NULL;
-    bool functor_defined = true;
 
     unsigned int dim;
     unsigned int type;
@@ -395,10 +346,9 @@ Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
         throw Rcpp::exception("Unknown polytope representation!");
     }
 
-    unsigned int numpoints;
+    unsigned int numpoints = Rcpp::as<unsigned int>(n);
     unsigned int nburns = 0;
     unsigned int walkL = 1;
-
 
     RNGType rng(dim);
     if (seed.isNotNull()) {
@@ -406,37 +356,39 @@ Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
         rng.set_seed(seed_rcpp);
     }
 
-    Point c(dim);
+    NT radius = 1.0;
+    NT L;
+    NT eta = -1;
 
-    NT radius = 1.0, L;
-    bool set_mode = false, gaussian = false, logconcave = false, exponential = false,
-                    set_starting_point = false, set_L = false;
+    bool set_mode = false;
+    bool gaussian = false;
+    bool logconcave = false;
+    bool exponential = false;
+    bool set_starting_point = false;
+    bool set_L = false;
+    bool functor_defined = true;
 
     random_walks walk;
     ode_solvers solver; // Used only for logconcave sampling
 
-    NT eta = 1;
     std::list<Point> randPoints;
     std::pair<Point, NT> InnerBall;
+
+    Point c(dim);
     Point mode(dim);
 
-    numpoints = Rcpp::as<unsigned int>(n);
     if (numpoints <= 0) throw Rcpp::exception("The number of samples has to be a positive integer!");
 
     if (!distribution.isNotNull() || !Rcpp::as<Rcpp::List>(distribution).containsElementNamed("density")) {
         walk = billiard;
-    } else if (
-            Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(distribution)["density"]).compare(std::string("uniform")) == 0) {
+    } else if (is_density(distribution, std::string("uniform"))) {
         walk = billiard;
-    } else if (
-            Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(distribution)["density"]).compare(std::string("gaussian")) == 0) {
+    } else if (is_density(distribution, std::string("gaussian"))) {
         gaussian = true;
-    } else if (
-            Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(distribution)["density"]).compare(std::string("exponential")) == 0) {
+    } else if (is_density(distribution, std::string("exponential"))) {
         walk = exponential_hmc;
         exponential = true;
-    } else if (
-            Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(distribution)["density"]).compare(std::string("logconcave")) == 0) {
+    } else if (is_density(distribution, std::string("logconcave"))) {
         logconcave = true;
     } else {
         throw Rcpp::exception("Wrong distribution!");
@@ -479,15 +431,14 @@ Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
         Rcpp::Function negative_logprob = Rcpp::as<Rcpp::List>(distribution)["negative_logprob"];
         Rcpp::Function negative_logprob_gradient = Rcpp::as<Rcpp::List>(distribution)["negative_logprob_gradient"];
 
-        NT L_ = 1, m = 1;
+        NT L_ = -1;
+        NT m = -1;
 
         if (Rcpp::as<Rcpp::List>(distribution).containsElementNamed("L_")) {
             L_ = Rcpp::as<NT>(Rcpp::as<Rcpp::List>(distribution)["L_"]);
             if (L_ <= NT(0)) {
                 throw Rcpp::exception("The smoothness constant must be positive");
             }
-        } else {
-            L_ = -1;
         }
 
         if (Rcpp::as<Rcpp::List>(distribution).containsElementNamed("m")) {
@@ -495,8 +446,6 @@ Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
             if (m <= NT(0)) {
                 throw Rcpp::exception("The strong-convexity constant must be positive");
             }
-        } else {
-            m = -1;
         }
 
         if (Rcpp::as<Rcpp::List>(random_walk).containsElementNamed("step_size")) {
@@ -504,8 +453,6 @@ Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
             if (eta <= NT(0)) {
                 throw Rcpp::exception("Step size must be positive");
             }
-        } else {
-            eta = NT(-1);
         }
 
         if (Rcpp::as<Rcpp::List>(random_walk).containsElementNamed("solver")) {
@@ -542,8 +489,6 @@ Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
             if (eta <= NT(0)) {
                 throw Rcpp::exception("Step size must be positive");
             }
-        } else {
-            eta = NT(-1);
         }
 
         if (Rcpp::as<Rcpp::List>(random_walk).containsElementNamed("solver")) {
@@ -562,7 +507,8 @@ Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
           solver = leapfrog;
         }
         // Create functors
-        GaussianFunctor::parameters<NT, Point>* gaussian_functor_params=new GaussianFunctor::parameters<NT, Point>(mode, a, eta);
+        GaussianFunctor::parameters<NT, Point>* gaussian_functor_params =
+            new GaussianFunctor::parameters<NT, Point>(mode, a, eta);
         G = new GaussianFunctor::GradientFunctor<Point>(*gaussian_functor_params);
         g = new GaussianFunctor::FunctionFunctor<Point>(*gaussian_functor_params);
         hess_g = new GaussianFunctor::HessianFunctor<Point>(*gaussian_functor_params);
@@ -570,7 +516,7 @@ Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
 
     if (!random_walk.isNotNull() || !Rcpp::as<Rcpp::List>(random_walk).containsElementNamed("walk")) {
         if (exponential) {
-            if (type !=1) {
+            if (type != 1) {
                 throw Rcpp::exception("Exponential sampling is supported only for H-polytopes");
             }
             walk = exponential_hmc;
@@ -581,39 +527,39 @@ Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
         } else {
             walk = (type == 1) ? accelarated_billiard : billiard;
         }
-    } else if (Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(random_walk)["walk"]).compare(std::string("CDHR")) == 0) {
+    } else if (is_walk(random_walk, std::string("CDHR"))) {
         walk = cdhr;
-    } else if (Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(random_walk)["walk"]).compare(std::string("dikin")) == 0) {
+    } else if (is_walk(random_walk, std::string("dikin"))) {
         walk = dikin_walk;
         if (Rcpp::as<Rcpp::List>(random_walk).containsElementNamed("L")) {
             L = Rcpp::as<NT>(Rcpp::as<Rcpp::List>(random_walk)["L"]);
             set_L = true;
             if (L <= 0.0) throw Rcpp::exception("L must be a postitive number!");
         }
-    } else if (Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(random_walk)["walk"]).compare(std::string("vaidya")) == 0) {
+    } else if (is_walk(random_walk, std::string("vaidya"))) {
         walk = vaidya_walk;
         if (Rcpp::as<Rcpp::List>(random_walk).containsElementNamed("L")) {
             L = Rcpp::as<NT>(Rcpp::as<Rcpp::List>(random_walk)["L"]);
             set_L = true;
             if (L <= 0.0) throw Rcpp::exception("L must be a postitive number!");
         }
-    } else if (Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(random_walk)["walk"]).compare(std::string("john")) == 0) {
+    } else if (is_walk(random_walk, std::string("john"))) {
         walk = john_walk;
         if (Rcpp::as<Rcpp::List>(random_walk).containsElementNamed("L")) {
             L = Rcpp::as<NT>(Rcpp::as<Rcpp::List>(random_walk)["L"]);
             set_L = true;
             if (L <= 0.0) throw Rcpp::exception("L must be a postitive number!");
         }
-    } else if (Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(random_walk)["walk"]).compare(std::string("RDHR")) == 0) {
+    } else if (is_walk(random_walk, std::string("RDHR"))) {
         walk = rdhr;
-    } else if (Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(random_walk)["walk"]).compare(std::string("BaW")) == 0) {
+    } else if (is_walk(random_walk, std::string("BaW"))) {
         walk = ball_walk;
         if (Rcpp::as<Rcpp::List>(random_walk).containsElementNamed("BaW_rad")) {
             L = Rcpp::as<NT>(Rcpp::as<Rcpp::List>(random_walk)["BaW_rad"]);
             set_L = true;
             if (L <= 0.0) throw Rcpp::exception("BaW diameter must be a postitive number!");
         }
-    } else if (Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(random_walk)["walk"]).compare(std::string("BiW")) == 0) {
+    } else if (is_walk(random_walk, std::string("BiW"))) {
         if (gaussian) throw Rcpp::exception("Billiard walk can be used only for uniform sampling!");
         walk = billiard;
         if (Rcpp::as<Rcpp::List>(random_walk).containsElementNamed("L")) {
@@ -621,7 +567,7 @@ Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
             set_L = true;
             if (L <= 0.0) throw Rcpp::exception("L must be a postitive number!");
         }
-    } else if (Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(random_walk)["walk"]).compare(std::string("aBiW")) == 0) {
+    } else if (is_walk(random_walk, std::string("aBiW"))) {
         if (gaussian) throw Rcpp::exception("Billiard walk can be used only for uniform sampling!");
         walk = accelarated_billiard;
         if (Rcpp::as<Rcpp::List>(random_walk).containsElementNamed("L")) {
@@ -629,31 +575,27 @@ Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
             set_L = true;
             if (L <= 0.0) throw Rcpp::exception("L must be a postitive number!");
         }
-    } else if (Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(random_walk)["walk"]).compare(std::string("BRDHR")) == 0) {
+    } else if (is_walk(random_walk, std::string("BRDHR"))) {
         if (gaussian || exponential) throw Rcpp::exception("Gaussian sampling from the boundary is not supported!");
         walk = brdhr;
-    } else if (Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(random_walk)["walk"]).compare(std::string("BCDHR")) == 0) {
+    } else if (is_walk(random_walk, std::string("BCDHR"))) {
         if (gaussian) throw Rcpp::exception("Gaussian sampling from the boundary is not supported!");
         walk = bcdhr;
-    } else if(Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(random_walk)["walk"]).compare(std::string("ExactHMC")) == 0) {
+    } else if(is_walk(random_walk, std::string("ExactHMC"))) {
         if (!exponential && !gaussian) throw Rcpp::exception("Exact HMC is supported only for exponential or spherical Gaussian sampling.");
-        if(exponential){
-            walk = exponential_hmc;
-        } else {
-            walk = gaussian_hmc;
-        }
-    } else if (Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(random_walk)["walk"]).compare(std::string("HMC")) == 0) {
+        walk = exponential ? exponential_hmc : gaussian_hmc;
+    } else if (is_walk(random_walk, std::string("HMC"))) {
         if (!logconcave) throw Rcpp::exception("HMC is not supported for non first-order sampling");
         if (F->params.L < 0) throw Rcpp::exception("The smoothness constant is absent");
         if (F->params.m < 0) throw Rcpp::exception("The strong-convexity constant is absent");
         walk = hmc;
-    } else if (Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(random_walk)["walk"]).compare(std::string("NUTS")) == 0) {
+    } else if (is_walk(random_walk, std::string("NUTS"))) {
         if (!logconcave) throw Rcpp::exception("NUTS is not supported for non first-order sampling");
         walk = nuts;
-    } else if (Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(random_walk)["walk"]).compare(std::string("ULD")) == 0) {
+    } else if (is_walk(random_walk, std::string("ULD"))) {
         if (!logconcave) throw Rcpp::exception("ULD is not supported for non first-order sampling");
         walk = uld;
-    } else if(Rcpp::as<std::string>(Rcpp::as<Rcpp::List>(random_walk)["walk"]).compare(std::string("CRHMC")) == 0){
+    } else if(is_walk(random_walk, std::string("CRHMC"))){
         if (!logconcave) throw Rcpp::exception("CRHMC is used for logconcave sampling");
         if (type !=1 && type !=5 ) {
             throw Rcpp::exception("CRHMC sampling is supported only for H-polytopes and Sparse Problems.");
@@ -796,12 +738,12 @@ Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
             if (functor_defined) {
                 execute_crhmc<sparse_problem, RNGType, std::list<Point>, RcppFunctor::GradientFunctor<Point>,
                               RcppFunctor::FunctionFunctor<Point>, RcppFunctor::HessianFunctor<Point>, CRHMCWalk, 1>
-                              (problem, rng, randPoints, walkL, numpoints, nburns, F, f, h);
+                    (problem, rng, randPoints, walkL, numpoints, nburns, F, f, h);
             }
             else {
                 execute_crhmc<sparse_problem, RNGType, std::list<Point>, GaussianFunctor::GradientFunctor<Point>,
                               GaussianFunctor::FunctionFunctor<Point>, GaussianFunctor::HessianFunctor<Point>, CRHMCWalk, 1>
-                              (problem, rng, randPoints, walkL, numpoints, nburns, G, g, hess_g);
+                    (problem, rng, randPoints, walkL, numpoints, nburns, G, g, hess_g);
             }
             break;
         }

@@ -35,7 +35,6 @@
 #' @name HpolytopeSparse-class
 #' @rdname HpolytopeSparse-class
 #' @exportClass HpolytopeSparse
-#' @importFrom "Matrix" "CsparseMatrix"
 HpolytopeSparse <- setClass (
   # Class name
   "HpolytopeSparse",
