@@ -5,32 +5,61 @@ The `volesti` package provides [R](https://www.r-project.org/) with functions fo
 
 `volesti` computes approximations of volume of polytopes given as a set of points or linear inequalities or as a Minkowski sum of segments (zonotopes). There are algorithms for volume approximation as well as algorithms for sampling, rounding and rotating polytopes. Last but not least, `volesti` provides implementations of geometric algorithms to compute the score of a portfolio given asset returns and to detect financial crises in stock markets.
 
+
+The latest **stable** version is available from CRAN.
+
+[![CRAN status](https://www.r-pkg.org/badges/version/volesti)](https://cran.r-project.org/package=volesti)
+[![CRAN check](https://badges.cranchecks.info/worst/volesti.svg)](https://cran.r-project.org/web/checks/check_results_volesti.html)
+[![CRAN downloads](https://cranlogs.r-pkg.org/badges/volesti)](https://cran.r-project.org/package=volesti)
+![CRAN/METACRAN](https://img.shields.io/cran/l/volesti)
+
+The latest **development** version is available in this repository.
+
+[![R-CMD-ubuntu](https://github.com/GeomScale/Rvolesti/workflows/R-CMD-check-ubuntu/badge.svg)](https://github.com/GeomScale/Rvolesti/actions?query=workflow%3AR-CMD-ubuntu)
+[![R-CMD-macOS](https://github.com/GeomScale/Rvolesti/workflows/R-CMD-check-macOS/badge.svg)](https://github.com/GeomScale/Rvolesti/actions?query=workflow%3AR-CMD-macOS)
+[![R-CMD-windows](https://github.com/GeomScale/Rvolesti/workflows/R-CMD-check-windows/badge.svg)](https://github.com/GeomScale/Rvolesti/actions?query=workflow%3AR-CMD-windows)
+
+
 ##  Download and install
 
-* The latest stable version is available from CRAN.
-* The latest development version is available on Github `https://github.com/GeomScale/Rvolesti`
+To use the development version you need to follow these steps:
 
-To use the development version of `volesti` that includes the C++ code, you need to clone the repository and fetch the submodule. Follow these steps:
+* Clone the `Rvolesti` repository.
 
-* Clone the main `Rvolesti` repository.
-
-* Build package by running:
-```
+* Build and install the package by running (from an `R` terminal):
+```R
 Rcpp::compileAttributes()
 devtools::build()
-```
-* Install Rvolesti by running:
-```
 install.packages("volesti")
 ```
+or from a bash terminal:
+```bash
+Rscript -e 'Rcpp::compileAttributes()'
+R CMD INSTALL --no-multiarch --with-keep.source .
+```
 
-The package-dependencies are: `Rcpp`, `RcppEigen`, `BH`.
+The following packages should be installed: `Rcpp`, `RcppEigen`, `BH`.
 
 ## Documentation
 
 * [Using the R Interface](https://github.com/GeomScale/volesti/blob/v1.1.1/doc/r_interface.md)
 * [Wikipage with Tutorials and Demos](https://github.com/GeomScale/volesti/wiki)
 * [Tutorial given to PyData meetup](https://vissarion.github.io/tutorials/volesti_tutorial_pydata.html)
+
+The user can generate or update the documentation:
+
+```R
+Rcpp::compileAttributes() # updates the Rcpp layer from C++ to R
+roxygen2::roxygenize(roclets="rd") # updates the docs based on roxygen comments
+```
+
+and generate a pdf with the docs:
+
+```R
+pack = "volesti"
+path = find.package(pack)
+system(paste(shQuote(file.path(R.home("bin"), "R")), "CMD", "Rd2pdf", shQuote(path)))
+```
 
 ## Credits
 

@@ -2,7 +2,7 @@
 #'
 #' A sparse H-polytope is a convex polytope defined by a set of linear inequalities or equivalently a
 #' \eqn{d}-dimensional H-polytope with \eqn{m} facets is defined by a \eqn{m\times d} matrix A and
-#' a \eqn{m}-dimensional vector b, s.t.: \eqn{Ax\leq b}, where $A$ is sparse.
+#' a \eqn{m}-dimensional vector b, s.t.: \eqn{Ax\leq b}, where \eqn{A} is sparse.
 #'
 #' \describe{
 #'    \item{Aineq}{An \eqn{m\times d} sparse numerical matrix for the inequalities.}
