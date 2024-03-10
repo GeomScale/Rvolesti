@@ -24,6 +24,7 @@
 #include "preprocess/svd_rounding.hpp"
 #include "preprocess/max_inscribed_ellipsoid_rounding.hpp"
 #include "extractMatPoly.h"
+#include <stdio.h>
 
 template
 <
@@ -101,7 +102,16 @@ Rcpp::List rounding (Rcpp::Reference P,
     if(method.isNotNull()) {
         method_rcpp =  Rcpp::as<std::string>(method);
         if (method_rcpp.compare(std::string("max_ellipsoid")) == 0 && type != 1) {
-            Rcpp::exception("This method can not be used for V- or Z-polytopes!");
+            Rcpp::Rcout << "Warning: The method max_ellipsoid cannot be used for V- or Z-polytopes." << std::endl;
+            std::string changeType;
+            Rcpp::Rcout << "Do you want to convert the polytope type to Hpolytope (y/n)? ";
+            std::cin >> changeType;
+            if(changeType == 'y' || changeTyoe == 'Y'){
+                Rcpp::Rcout << "Polytope type changed to Hpolytope." << std::endl;
+                type = 1; //change the tope to Hpolytope
+            } else{
+                throw Rcpp::exception("This method can not be used for V- or Z-polytopes!");
+            }
         }
     }
 
