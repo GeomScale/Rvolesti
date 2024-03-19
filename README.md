@@ -38,13 +38,16 @@ Rscript -e 'Rcpp::compileAttributes()'
 R CMD INSTALL --no-multiarch --with-keep.source .
 ```
 
-The following packages should be installed: `Rcpp`, `RcppEigen`, `BH`.
+The following packages should be installed: `Rcpp`, `RcppEigen`, `BH`, `devtools`.
+
+Optionally the user can run tests and examples by running (from an `R` terminal):
+
+```R
+devtools::tests()
+devtools::run_examples()
+```
 
 ## Documentation
-
-* [Using the R Interface](https://github.com/GeomScale/volesti/blob/v1.1.1/doc/r_interface.md)
-* [Wikipage with Tutorials and Demos](https://github.com/GeomScale/volesti/wiki)
-* [Tutorial given to PyData meetup](https://vissarion.github.io/tutorials/volesti_tutorial_pydata.html)
 
 The user can generate or update the documentation:
 
@@ -61,12 +64,13 @@ path = find.package(pack)
 system(paste(shQuote(file.path(R.home("bin"), "R")), "CMD", "Rd2pdf", shQuote(path)))
 ```
 
+The documentation contains examples for all available functions.
+More examples are available in `man/examples` directory.
+
 ## Credits
 
-* [Contributors and Package History](https://github.com/GeomScale/volesti/blob/v1.1.1/doc/credits.md)
-* [List of Publications](https://github.com/GeomScale/volesti/blob/v1.1.1/doc/publications.md)
-
 Copyright (c) 2012-2024 Vissarion Fisikopoulos
+
 Copyright (c) 2018-2024 Apostolos Chalkis
 
 You may redistribute or modify the software under the GNU Lesser General Public License as published by Free Software Foundation, either version 3 of the License, or (at your option) any later version. It is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY.
