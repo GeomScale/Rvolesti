@@ -43,10 +43,10 @@ The following packages should be installed: `Rcpp`, `RcppEigen`, `BH`, `devtools
 Optionally the user can run tests and examples by running (from an `R` terminal):
 
 ```R
-devtools::tests()
+devtools::test()
 devtools::run_examples()
 ```
-
+Fro running the tests, user must be in the /tests directory.
 ## Documentation
 
 The user can generate or update the documentation:
