@@ -20,7 +20,7 @@
 #include "volume/volume_cooling_gaussians.hpp"
 #include "volume/volume_cooling_balls.hpp"
 #include "volume/volume_cooling_hpoly.hpp"
-#include "preprocess/max_inscribed_ellipsoid_rounding.hpp"
+#include "preprocess/inscribed_ellipsoid_rounding.hpp"
 #include "preprocess/svd_rounding.hpp"
 
 enum random_walks {ball_walk, rdhr, cdhr, billiard, accelarated_billiard};
@@ -78,7 +78,7 @@ std::pair<double, double> generic_volume(Polytope& P, RNGType &rng, unsigned int
         }
         break;
     case max_ellipsoid:
-        round_val = std::get<2>(max_inscribed_ellipsoid_rounding<MT, VT, NT>(P, InnerBall.first));
+        round_val = std::get<2>(inscribed_ellipsoid_rounding<MT, VT, NT>(P, InnerBall.first));
         break;
     default:
         break;
