@@ -22,7 +22,7 @@
 #include "volume/volume_cooling_gaussians.hpp"
 #include "preprocess/min_sampling_covering_ellipsoid_rounding.hpp"
 #include "preprocess/svd_rounding.hpp"
-#include "preprocess/max_inscribed_ellipsoid_rounding.hpp"
+#include "preprocess/inscribed_ellipsoid_rounding.hpp"
 #include "extractMatPoly.h"
 
 template
@@ -125,7 +125,7 @@ Rcpp::List rounding (Rcpp::Reference P,
             InnerBall = HP.ComputeInnerBall();
             if (InnerBall.second < 0.0) throw Rcpp::exception("Unable to compute a feasible point.");
             if (method_rcpp.compare(std::string("max_ellipsoid")) == 0) {
-                round_res = max_inscribed_ellipsoid_rounding<MT, VT, NT>(HP, InnerBall.first);
+                round_res = inscribed_ellipsoid_rounding<MT, VT, NT>(HP, InnerBall.first);
             } else {
                 round_res = apply_rounding<MT, VT, AcceleratedBilliardWalk>(HP, method_rcpp, walkL, InnerBall, rng);
             }
