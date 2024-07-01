@@ -81,7 +81,6 @@ Rcpp::List uniform_sampling_correlation_MT(const unsigned int n, const unsigned 
     }
 
     Rcpp::List result = Rcpp::List::create(
-        Rcpp::Named("valid_points") = valid_points,
         Rcpp::Named("elapsed_time") = time,
         Rcpp::Named("sampled_points") = rcpp_sampled_points
     );
