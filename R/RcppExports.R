@@ -364,13 +364,15 @@ sample_points <- function(P, n, random_walk = NULL, distribution = NULL, seed = 
 #'
 #' @param n The dimension of the correlation matrix.
 #' @param num_points The number of sample points to generate.
+#' @param walkL The length of the random walk.
+#' @param nburns The number of burn-in steps for the random walk.
 #' @param validate Optional. Whether to validate the sampled matrices. Default is false.
 #'
 #' @return A list of sampled correlation matrices.
 NULL
 
-uniform_sampling_correlation_MT <- function(n, num_points = 1000L, validate = FALSE) {
-    .Call(`_volesti_uniform_sampling_correlation_MT`, n, num_points, validate)
+uniform_sample_correlation_matrices <- function(n, num_points = 1000L, walkL = 1L, nburns = 0L, validate = FALSE) {
+    .Call(`_volesti_uniform_sample_correlation_matrices`, n, num_points, walkL, nburns, validate)
 }
 
 #' The main function for volume approximation of a convex Polytope (H-polytope, V-polytope, zonotope or intersection of two V-polytopes). It returns a list with two elements: (a) the logarithm of the estimated volume and (b) the estimated volume
@@ -454,3 +456,4 @@ write_sdpa_format_file <- function(spectrahedron, objective_function, output_fil
 zono_approx <- function(Z, fit_ratio = NULL, settings = NULL, seed = NULL) {
     .Call(`_volesti_zono_approx`, Z, fit_ratio, settings, seed)
 }
+
