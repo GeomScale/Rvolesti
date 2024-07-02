@@ -204,16 +204,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// uniform_sampling_correlation_MT
-Rcpp::List uniform_sampling_correlation_MT(const unsigned int n, const unsigned int num_points, const bool validate);
-RcppExport SEXP _volesti_uniform_sampling_correlation_MT(SEXP nSEXP, SEXP num_pointsSEXP, SEXP validateSEXP) {
+// uniform_sample_correlation_matrices
+Rcpp::List uniform_sample_correlation_matrices(const unsigned int n, const unsigned int num_points, const unsigned int walkL, const unsigned int nburns, const bool validate);
+RcppExport SEXP _volesti_uniform_sample_correlation_matrices(SEXP nSEXP, SEXP num_pointsSEXP, SEXP walkLSEXP, SEXP nburnsSEXP, SEXP validateSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const unsigned int >::type n(nSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type num_points(num_pointsSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type walkL(walkLSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type nburns(nburnsSEXP);
     Rcpp::traits::input_parameter< const bool >::type validate(validateSEXP);
-    rcpp_result_gen = Rcpp::wrap(uniform_sampling_correlation_MT(n, num_points, validate));
+    rcpp_result_gen = Rcpp::wrap(uniform_sample_correlation_matrices(n, num_points, walkL, nburns, validate));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -273,7 +275,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_volesti_rotating", (DL_FUNC) &_volesti_rotating, 3},
     {"_volesti_rounding", (DL_FUNC) &_volesti_rounding, 3},
     {"_volesti_sample_points", (DL_FUNC) &_volesti_sample_points, 5},
-    {"_volesti_uniform_sampling_correlation_MT", (DL_FUNC) &_volesti_uniform_sampling_correlation_MT, 3},
+    {"_volesti_uniform_sample_correlation_matrices", (DL_FUNC) &_volesti_uniform_sample_correlation_matrices, 5},
     {"_volesti_volume", (DL_FUNC) &_volesti_volume, 3},
     {"_volesti_write_sdpa_format_file", (DL_FUNC) &_volesti_write_sdpa_format_file, 3},
     {"_volesti_zono_approx", (DL_FUNC) &_volesti_zono_approx, 4},
