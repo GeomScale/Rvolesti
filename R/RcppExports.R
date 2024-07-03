@@ -363,16 +363,16 @@ sample_points <- function(P, n, random_walk = NULL, distribution = NULL, seed = 
 #' Uniformly sample correlation matrices
 #'
 #' @param n The dimension of the correlation matrix.
-#' @param num_points The number of sample points to generate.
-#' @param walkL The length of the random walk.
+#' @param num_matrices The number of matrices to generate.
+#' @param walk_length The length of the random walk.
 #' @param nburns The number of burn-in steps for the random walk.
 #' @param validate Optional. Whether to validate the sampled matrices. Default is false.
 #'
 #' @return A list of sampled correlation matrices.
 NULL
 
-uniform_sample_correlation_matrices <- function(n, num_points = 1000L, walkL = 1L, nburns = 0L, validate = FALSE) {
-    .Call(`_volesti_uniform_sample_correlation_matrices`, n, num_points, walkL, nburns, validate)
+uniform_sample_correlation_matrices <- function(n, num_matrices = 1000L, walk_length = 1L, nburns = 0L, validate = FALSE) {
+    .Call(`_volesti_uniform_sample_correlation_matrices`, n, num_matrices, walk_length, nburns, validate)
 }
 
 #' The main function for volume approximation of a convex Polytope (H-polytope, V-polytope, zonotope or intersection of two V-polytopes). It returns a list with two elements: (a) the logarithm of the estimated volume and (b) the estimated volume
