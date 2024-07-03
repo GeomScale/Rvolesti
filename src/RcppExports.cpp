@@ -205,17 +205,17 @@ BEGIN_RCPP
 END_RCPP
 }
 // uniform_sample_correlation_matrices
-Rcpp::List uniform_sample_correlation_matrices(const unsigned int n, const unsigned int num_points, const unsigned int walkL, const unsigned int nburns, const bool validate);
-RcppExport SEXP _volesti_uniform_sample_correlation_matrices(SEXP nSEXP, SEXP num_pointsSEXP, SEXP walkLSEXP, SEXP nburnsSEXP, SEXP validateSEXP) {
+Rcpp::List uniform_sample_correlation_matrices(const unsigned int n, const unsigned int num_matrices, const unsigned int walk_length, const unsigned int nburns, const bool validate);
+RcppExport SEXP _volesti_uniform_sample_correlation_matrices(SEXP nSEXP, SEXP num_matricesSEXP, SEXP walk_lengthSEXP, SEXP nburnsSEXP, SEXP validateSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const unsigned int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type num_points(num_pointsSEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type walkL(walkLSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type num_matrices(num_matricesSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type walk_length(walk_lengthSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type nburns(nburnsSEXP);
     Rcpp::traits::input_parameter< const bool >::type validate(validateSEXP);
-    rcpp_result_gen = Rcpp::wrap(uniform_sample_correlation_matrices(n, num_points, walkL, nburns, validate));
+    rcpp_result_gen = Rcpp::wrap(uniform_sample_correlation_matrices(n, num_matrices, walk_length, nburns, validate));
     return rcpp_result_gen;
 END_RCPP
 }
