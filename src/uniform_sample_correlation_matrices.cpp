@@ -22,8 +22,8 @@
 //' @return A list of sampled correlation matrices.
 
 // [[Rcpp::export]]
-Rcpp::List uniform_sample_correlation_matrices(const unsigned int n, const unsigned int num_matrices = 1000,
- const unsigned int walk_length=1, const unsigned int nburns = 0,  const bool validate = false) {
+Rcpp::List uniform_sample_correlation_matrices(const unsigned int n, const unsigned int num_matrices = 1000, 
+                                               const unsigned int walk_length=1, const unsigned int nburns = 0,  const bool validate = false) {
     typedef double NT;
     typedef Eigen::Matrix<NT, Eigen::Dynamic, Eigen::Dynamic> MT;
     typedef BoostRandomNumberGenerator<boost::mt19937, NT> RNGType;
@@ -33,7 +33,7 @@ Rcpp::List uniform_sample_correlation_matrices(const unsigned int n, const unsig
 
     uniform_correlation_sampling_MT<AcceleratedBilliardWalk, PointMT, RNGType>(n, randPoints, walk_length, num_matrices, nburns);
 
-    const double tol = 1e-8;
+    const NT tol = 1e-8;
 
     std::vector<MT> sampled_correlation_matrices; 
 
