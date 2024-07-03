@@ -32,7 +32,6 @@ Rcpp::List uniform_sample_correlation_matrices(const unsigned int n, const unsig
 
     uniform_correlation_sampling_MT<AcceleratedBilliardWalk, PointMT, RNGType>(n, randPoints, walkL, num_points, nburns);
 
-    int valid_points = 0;
     const double tol = 1e-8;
 
     std::vector<MT> sampled_correlation_matrices; 
@@ -41,8 +40,6 @@ Rcpp::List uniform_sample_correlation_matrices(const unsigned int n, const unsig
         sampled_correlation_matrices.push_back(points.mat); // Store the sampled point
 
         if (validate) {
-            bool flag = true;
-
             // Check if all the diagonal elements are 1
             for (int i = 0; i < points.mat.rows(); i++) {
                 if (std::abs(points.mat(i, i) - 1.0) > tol) {
@@ -57,23 +54,19 @@ Rcpp::List uniform_sample_correlation_matrices(const unsigned int n, const unsig
                 throw Rcpp::exception("Invalid correlation matrix: matrix decomposition failed");
             }
 
-            if (eigen_solver.eigenvalues().minCoeff() > -tol) flag = true;
-            else {
+            if (eigen_solver.eigenvalues().minCoeff() < tol) {
                 throw Rcpp::exception("Invalid correlation matrix: matrix is not positive definite");
             }
-
-            if (flag == true) valid_points++;
         }
     }
 
-    Rcpp::List rcpp_sampled_points(sampled_correlation_matrices.size());
+    Rcpp::List rcpp_sampled_matrices(sampled_correlation_matrices.size());
     for (size_t i = 0; i < sampled_correlation_matrices.size(); ++i) {
-        rcpp_sampled_points[i] = Rcpp::wrap(sampled_correlation_matrices[i]);
+        rcpp_sampled_matrices[i] = Rcpp::wrap(sampled_correlation_matrices[i]);
     }
 
     Rcpp::List result = Rcpp::List::create(
-        Rcpp::Named("valid_points") = valid_points,
-        Rcpp::Named("sampled_points") = rcpp_sampled_points
+        Rcpp::Named("sampled_matrices") = rcpp_sampled_matrices
     );
 
     return result;
