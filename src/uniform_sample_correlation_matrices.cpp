@@ -14,15 +14,16 @@
 //' Uniformly sample correlation matrices
 //'
 //' @param n The dimension of the correlation matrix.
-//' @param num_points The number of sample points to generate.
-//' @param walkL The length of the random walk.
+//' @param num_matrices The number of matrices to generate.
+//' @param walk_length The length of the random walk.
 //' @param nburns The number of burn-in steps for the random walk.
 //' @param validate Optional. Whether to validate the sampled matrices. Default is false.
 //'
 //' @return A list of sampled correlation matrices.
 
 // [[Rcpp::export]]
-Rcpp::List uniform_sample_correlation_matrices(const unsigned int n, const unsigned int num_points = 1000, const unsigned int walkL=1, const unsigned int nburns = 0,  const bool validate = false) {
+Rcpp::List uniform_sample_correlation_matrices(const unsigned int n, const unsigned int num_matrices = 1000,
+ const unsigned int walk_length=1, const unsigned int nburns = 0,  const bool validate = false) {
     typedef double NT;
     typedef Eigen::Matrix<NT, Eigen::Dynamic, Eigen::Dynamic> MT;
     typedef BoostRandomNumberGenerator<boost::mt19937, NT> RNGType;
@@ -30,7 +31,7 @@ Rcpp::List uniform_sample_correlation_matrices(const unsigned int n, const unsig
 
     std::vector<PointMT> randPoints;
 
-    uniform_correlation_sampling_MT<AcceleratedBilliardWalk, PointMT, RNGType>(n, randPoints, walkL, num_points, nburns);
+    uniform_correlation_sampling_MT<AcceleratedBilliardWalk, PointMT, RNGType>(n, randPoints, walk_length, num_matrices, nburns);
 
     const double tol = 1e-8;
 
