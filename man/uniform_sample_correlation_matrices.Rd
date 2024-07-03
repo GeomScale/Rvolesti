@@ -4,14 +4,14 @@
 \alias{uniform_sample_correlation_matrices}
 \title{Uniformly sample correlation matrices}
 \usage{
-uniform_sample_correlation_matrices(n, num_points = 1000, walkL = 1, nburns = 0, validate = FALSE)
+uniform_sample_correlation_matrices(n, num_matrices = 1000, walk_length = 1, nburns = 0, validate = FALSE)
 }
 \arguments{
 \item{n}{The dimension of the correlation matrix.}
 
-\item{num_points}{The number of sample points to generate.}
+\item{num_matrices}{The number of matrices to generate.}
 
-\item{walkL}{The length of the random walk.}
+\item{walk_length}{The length of the random walk.}
 
 \item{nburns}{The number of burn-in steps for the random walk.}
 
