@@ -10,6 +10,7 @@
 #include "cartesian_geom/cartesian_kernel.h"
 #include "random_walks/random_walks.hpp"
 #include "sampling/sample_correlation_matrices.hpp"
+#include "matrix_operations/EigenvaluesProblems.h"
 
 //' Uniformly sample correlation matrices
 //'
@@ -22,7 +23,7 @@
 //' @return A list of sampled correlation matrices.
 
 // [[Rcpp::export]]
-Rcpp::List uniform_sample_correlation_matrices(const unsigned int n, const unsigned int num_matrices = 1000, 
+Rcpp::List uniform_sample_correlation_matrices(const unsigned int n, const unsigned int num_matrices = 1000,
                                                const unsigned int walk_length=1, const unsigned int nburns = 0,  const bool validate = false) {
     typedef double NT;
     typedef Eigen::Matrix<NT, Eigen::Dynamic, Eigen::Dynamic> MT;
@@ -33,7 +34,7 @@ Rcpp::List uniform_sample_correlation_matrices(const unsigned int n, const unsig
 
     uniform_correlation_sampling_MT<AcceleratedBilliardWalk, PointMT, RNGType>(n, randPoints, walk_length, num_matrices, nburns);
 
-    const NT tol = 1e-8;
+    EigenvaluesProblems<NT, MT, Eigen::Matrix<NT, Eigen::Dynamic, 1>> solver;
 
     std::vector<MT> sampled_correlation_matrices; 
 
@@ -41,22 +42,9 @@ Rcpp::List uniform_sample_correlation_matrices(const unsigned int n, const unsig
         sampled_correlation_matrices.push_back(points.mat); // Store the sampled point
 
         if (validate) {
-            // Check if all the diagonal elements are 1
-            for (int i = 0; i < points.mat.rows(); i++) {
-                if (std::abs(points.mat(i, i) - 1.0) > tol) {
-                    throw Rcpp::exception("Invalid correlation matrix: not all diagonal elements are 1");
-                }
-            }
-
-            // Check if the matrix is positive definite
-            Eigen::SelfAdjointEigenSolver<MT> eigen_solver(points.mat);
-
-            if (eigen_solver.info() != Eigen::Success) {
-                throw Rcpp::exception("Invalid correlation matrix: matrix decomposition failed");
-            }
-
-            if (eigen_solver.eigenvalues().minCoeff() < tol) {
-                throw Rcpp::exception("Invalid correlation matrix: matrix is not positive definite");
+            const NT tol = 1e-8;
+            if (!solver.is_correlation_matrix(points.mat, tol)) {
+                throw Rcpp::exception("Invalid correlation matrix");
             }
         }
     }
