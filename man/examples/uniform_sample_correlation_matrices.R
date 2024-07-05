@@ -20,6 +20,6 @@ library(volesti)
 # nburns: The number of burn-in steps for the random walk (default is 0)
 # validate: Whether to validate the sampled matrices (default is FALSE)
 
-result <- uniform_sample_correlation_matrices(n = 5, num_matrices = 10, walk_length = 2, nburns = 0, validate = TRUE)
+result <- uniform_sample_correlation_matrices(n = 4, num_matrices = 5000, walk_length = 2, nburns = 0, validate = TRUE)
 
 # result now contains the list of sampled correlation matrices
