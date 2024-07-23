@@ -30,28 +30,25 @@ Rcpp::List uniform_sample_correlation_matrices(const unsigned int n, const unsig
     typedef BoostRandomNumberGenerator<boost::mt19937, NT> RNGType;
     typedef CorreMatrix<NT> PointMT;
 
-    std::vector<PointMT> randPoints;
+    std::list<MT> randCorMatrices;
 
-    uniform_correlation_sampling_MT<AcceleratedBilliardWalk, PointMT, RNGType>(n, randPoints, walk_length, num_matrices, nburns);
+    uniform_correlation_sampling_MT<AcceleratedBilliardWalk, PointMT, RNGType>(n, randCorMatrices, walk_length, num_matrices, nburns);
 
     EigenvaluesProblems<NT, MT, Eigen::Matrix<NT, Eigen::Dynamic, 1>> solver;
 
-    std::vector<MT> sampled_correlation_matrices; 
+     if (validate) {
+         const NT tol = 1e-8;
+         for (const auto& mat : randCorMatrices) {
+             if (!solver.is_correlation_matrix(mat, tol)) {
+                 throw Rcpp::exception("Invalid correlation matrix");
+             }
+         }
+     } 
 
-    for (const auto& points : randPoints) {
-        sampled_correlation_matrices.push_back(points.mat); // Store the sampled point
-
-        if (validate) {
-            const NT tol = 1e-8;
-            if (!solver.is_correlation_matrix(points.mat, tol)) {
-                throw Rcpp::exception("Invalid correlation matrix");
-            }
-        }
-    }
-
-    Rcpp::List rcpp_sampled_matrices(sampled_correlation_matrices.size());
-    for (size_t i = 0; i < sampled_correlation_matrices.size(); ++i) {
-        rcpp_sampled_matrices[i] = Rcpp::wrap(sampled_correlation_matrices[i]);
+    Rcpp::List rcpp_sampled_matrices(randCorMatrices.size());
+    int index = 0;
+    for (const auto& mat : randCorMatrices) {
+        rcpp_sampled_matrices[index++] = Rcpp::wrap(mat);
     }
 
     Rcpp::List result = Rcpp::List::create(
