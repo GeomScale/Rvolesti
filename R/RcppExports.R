@@ -360,6 +360,21 @@ sample_points <- function(P, n, random_walk = NULL, distribution = NULL, seed = 
     .Call(`_volesti_sample_points`, P, n, random_walk, distribution, seed)
 }
 
+#' Uniformly sample correlation matrices
+#'
+#' @param n The dimension of the correlation matrix.
+#' @param num_matrices The number of matrices to generate.
+#' @param walk_length The length of the random walk.
+#' @param nburns The number of burn-in steps for the random walk.
+#' @param validate Optional. Whether to validate the sampled matrices. Default is false.
+#'
+#' @return A list of sampled correlation matrices.
+NULL
+
+uniform_sample_correlation_matrices <- function(n, num_matrices = 1000L, walk_length = 1L, nburns = 0L, validate = FALSE) {
+    .Call(`_volesti_uniform_sample_correlation_matrices`, n, num_matrices, walk_length, nburns, validate)
+}
+
 #' The main function for volume approximation of a convex Polytope (H-polytope, V-polytope, zonotope or intersection of two V-polytopes). It returns a list with two elements: (a) the logarithm of the estimated volume and (b) the estimated volume
 #'
 #' For the volume approximation can be used three algorithms. Either CoolingBodies (CB) or SequenceOfBalls (SOB) or CoolingGaussian (CG). An H-polytope with \eqn{m} facets is described by a \eqn{m\times d} matrix \eqn{A} and a \eqn{m}-dimensional vector \eqn{b}, s.t.: \eqn{P=\{x\ |\  Ax\leq b\} }. A V-polytope is defined as the convex hull of \eqn{m} \eqn{d}-dimensional points which correspond to the vertices of P. A zonotope is desrcibed by the Minkowski sum of \eqn{m} \eqn{d}-dimensional segments.
