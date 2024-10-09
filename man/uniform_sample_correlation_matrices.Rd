@@ -4,7 +4,13 @@
 \alias{uniform_sample_correlation_matrices}
 \title{Uniformly sample correlation matrices}
 \usage{
-uniform_sample_correlation_matrices(n, num_matrices = 1000, walk_length = 1, nburns = 0, validate = FALSE)
+uniform_sample_correlation_matrices(
+  n,
+  num_matrices = 1000L,
+  walk_length = 1L,
+  nburns = 0L,
+  validate = FALSE
+)
 }
 \arguments{
 \item{n}{The dimension of the correlation matrix.}

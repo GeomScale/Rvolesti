@@ -42,10 +42,10 @@ copula <- function(r1, r2 = NULL, sigma = NULL, m = NULL, n = NULL, seed = NULL)
 #' The \eqn{d}-dimensional unit simplex is the set of points \eqn{\vec{x}\in \R^d}, s.t.: \eqn{\sum_i x_i\leq 1}, \eqn{x_i\geq 0}. The \eqn{d}-dimensional canonical simplex is the set of points \eqn{\vec{x}\in \R^d}, s.t.: \eqn{\sum_i x_i = 1}, \eqn{x_i\geq 0}.
 #'
 #' @param body A list to request exact uniform sampling from special well known convex bodies through the following input parameters:
-#' \itemize{
-#' \item{\code{type} }{ A string that declares the type of the body for the exact sampling: a) \code{'unit_simplex'} for the unit simplex, b) \code{'canonical_simplex'} for the canonical simplex, c) \code{'hypersphere'} for the boundary of a hypersphere centered at the origin, d) \code{'ball'} for the interior of a hypersphere centered at the origin.}
-#' \item{\code{dimension} }{ An integer that declares the dimension when exact sampling is enabled for a simplex or a hypersphere.}
-#' \item{\code{radius} }{ The radius of the \eqn{d}-dimensional hypersphere. The default value is \eqn{1}.}
+#' \describe{
+#' \item{\code{type}}{A string that declares the type of the body for the exact sampling: a) \code{'unit_simplex'} for the unit simplex, b) \code{'canonical_simplex'} for the canonical simplex, c) \code{'hypersphere'} for the boundary of a hypersphere centered at the origin, d) \code{'ball'} for the interior of a hypersphere centered at the origin.}
+#' \item{\code{dimension}}{An integer that declares the dimension when exact sampling is enabled for a simplex or a hypersphere.}
+#' \item{\code{radius}}{The radius of the \eqn{d}-dimensional hypersphere. The default value is \eqn{1}.}
 #' }
 #' @param n The number of points that the function is going to sample.
 #' @param seed Optional. A fixed seed for the number generator.
@@ -286,8 +286,8 @@ rounding <- function(P, method = NULL, seed = NULL) {
 #' @param P A convex polytope. It is an object from class (a) Hpolytope or (b) Vpolytope or (c) Zonotope or (d) VpolytopeIntersection.
 #' @param n The number of points that the function is going to sample from the convex polytope.
 #' @param random_walk Optional. A list that declares the random walk and some related parameters as follows:
-#' \itemize{
-#' \item{\code{walk} }{ A string to declare the random walk: i) \code{'CDHR'} for Coordinate Directions Hit-and-Run,
+#' \describe{
+#' \item{\code{walk}}{A string to declare the random walk: i) \code{'CDHR'} for Coordinate Directions Hit-and-Run,
 #' ii) \code{'RDHR'} for Random Directions Hit-and-Run, iii) \code{'BaW'} for Ball Walk, iv) \code{'BiW'} for Billiard walk,
 #' v) \code{'dikin'} for dikin walk, vi) \code{'vaidya'} for vaidya walk, vii) \code{'john'} for john walk,
 #' viii) \code{'BCDHR'} boundary sampling by keeping the extreme points of CDHR or ix) \code{'BRDHR'} boundary sampling by keeping the extreme points of RDHR,
@@ -298,24 +298,24 @@ rounding <- function(P, method = NULL, seed = NULL) {
 #' The default walk is \code{'aBiW'} for the uniform distribution, \code{'CDHR'} for the Gaussian distribution and H-polytopes and
 #' \code{'BiW'} or \code{'RDHR'} for the same distributions and V-polytopes and zonotopes. \code{'NUTS'} is the default sampler for logconcave densities and \code{'CRHMC'}
 #' for logconcave densities with H-polytope and sparse constrainted problems.}
-#' \item{\code{walk_length} }{ The number of the steps per generated point for the random walk. The default value is \eqn{1}.}
-#' \item{\code{nburns} }{ The number of points to burn before start sampling. The default value is \eqn{1}.}
-#' \item{\code{starting_point} }{ A \eqn{d}-dimensional numerical vector that declares a starting point in the interior of the polytope for the random walk. The default choice is the center of the ball as that one computed by the function \code{inner_ball()}.}
-#' \item{\code{BaW_rad} }{ The radius for the ball walk.}
-#' \item{\code{L} }{ The maximum length of the billiard trajectory or the radius for the step of dikin, vaidya or john walk.}
-#' \item{\code{solver} }{ Specify ODE solver for logconcave sampling. Options are i) leapfrog, ii) euler iii) runge-kutta iv) richardson}
-#' \item{\code{step_size} }{ Optionally chosen step size for logconcave sampling. Defaults to a theoretical value if not provided.}
+#' \item{\code{walk_length}}{The number of the steps per generated point for the random walk. The default value is \eqn{1}.}
+#' \item{\code{nburns}}{The number of points to burn before start sampling. The default value is \eqn{1}.}
+#' \item{\code{starting_point}}{A \eqn{d}-dimensional numerical vector that declares a starting point in the interior of the polytope for the random walk. The default choice is the center of the ball as that one computed by the function \code{inner_ball()}.}
+#' \item{\code{BaW_rad}}{The radius for the ball walk.}
+#' \item{\code{L}}{The maximum length of the billiard trajectory or the radius for the step of dikin, vaidya or john walk.}
+#' \item{\code{solver}}{Specify ODE solver for logconcave sampling. Options are i) leapfrog, ii) euler iii) runge-kutta iv) richardson}
+#' \item{\code{step_size}}{Optionally chosen step size for logconcave sampling. Defaults to a theoretical value if not provided.}
 #' }
 #' @param distribution Optional. A list that declares the target density and some related parameters as follows:
-#' \itemize{
-#' \item{\code{density} }{ A string: (a) \code{'uniform'} for the uniform distribution or b) \code{'gaussian'} for the multidimensional spherical distribution c) \code{logconcave} with form proportional to exp(-f(x)) where f(x) is L-smooth and m-strongly-convex d) \code{'exponential'} for the exponential distribution. The default target distribution is the uniform distribution.}
-#' \item{\code{variance} }{ The variance of the multidimensional spherical gaussian or the exponential distribution. The default value is 1.}
-#' \item{\code{mode} }{ A \eqn{d}-dimensional numerical vector that declares the mode of the Gaussian distribution. The default choice is the center of the as that one computed by the function \code{inner_ball()}.}
-#' \item{\code{bias} }{ The bias vector for the exponential distribution. The default vector is \eqn{c_1 = 1} and \eqn{c_i = 0} for \eqn{i \neq 1}.}
-#' \item{\code{L_} }{ Smoothness constant (for logconcave). }
-#' \item{\code{m} }{ Strong-convexity constant (for logconcave). }
-#' \item{\code{negative_logprob} }{ Negative log-probability (for logconcave). }
-#' \item{\code{negative_logprob_gradient} }{ Negative log-probability gradient (for logconcave). }
+#' \describe{
+#' \item{\code{density}}{A string: (a) \code{'uniform'} for the uniform distribution or b) \code{'gaussian'} for the multidimensional spherical distribution c) \code{logconcave} with form proportional to exp(-f(x)) where f(x) is L-smooth and m-strongly-convex d) \code{'exponential'} for the exponential distribution. The default target distribution is the uniform distribution.}
+#' \item{\code{variance}}{The variance of the multidimensional spherical gaussian or the exponential distribution. The default value is 1.}
+#' \item{\code{mode}}{A \eqn{d}-dimensional numerical vector that declares the mode of the Gaussian distribution. The default choice is the center of the as that one computed by the function \code{inner_ball()}.}
+#' \item{\code{bias}}{The bias vector for the exponential distribution. The default vector is \eqn{c_1 = 1} and \eqn{c_i = 0} for \eqn{i \neq 1}.}
+#' \item{\code{L_}}{Smoothness constant (for logconcave). }
+#' \item{\code{m}}{Strong-convexity constant (for logconcave). }
+#' \item{\code{negative_logprob}}{Negative log-probability (for logconcave). }
+#' \item{\code{negative_logprob_gradient}}{Negative log-probability gradient (for logconcave). }
 #' }
 #' @param seed Optional. A fixed seed for the number generator.
 #'
@@ -369,8 +369,6 @@ sample_points <- function(P, n, random_walk = NULL, distribution = NULL, seed = 
 #' @param validate Optional. Whether to validate the sampled matrices. Default is false.
 #'
 #' @return A list of sampled correlation matrices.
-NULL
-
 uniform_sample_correlation_matrices <- function(n, num_matrices = 1000L, walk_length = 1L, nburns = 0L, validate = FALSE) {
     .Call(`_volesti_uniform_sample_correlation_matrices`, n, num_matrices, walk_length, nburns, validate)
 }
@@ -381,14 +379,14 @@ uniform_sample_correlation_matrices <- function(n, num_matrices = 1000L, walk_le
 #'
 #' @param P A convex polytope. It is an object from class a) Hpolytope or b) Vpolytope or c) Zonotope or d) VpolytopeIntersection.
 #' @param settings Optional. A list that declares which algorithm, random walk and values of parameters to use, as follows:
-#' \itemize{
-#' \item{\code{algorithm} }{ A string to set the algorithm to use: a) \code{'CB'} for CB algorithm, b) \code{'SoB'} for SOB algorithm or b) \code{'CG'} for CG algorithm. The defalut algorithm is \code{'CB'}.}
-#' \item{\code{error} }{ A numeric value to set the upper bound for the approximation error. The default value is \eqn{1} for SOB algorithm and \eqn{0.1} otherwise.}
-#' \item{\code{random_walk} }{ A string that declares the random walk method: a) \code{'CDHR'} for Coordinate Directions Hit-and-Run, b) \code{'RDHR'} for Random Directions Hit-and-Run, c) \code{'BaW'} for Ball Walk, or \code{'BiW'} for Billiard walk. For CB algorithm the default walk is \code{'BiW'}. For CG and SOB algorithms the default walk is \code{'CDHR'} for H-polytopes and \code{'RDHR'} for the other representations.}
-#' \item{\code{walk_length} }{ An integer to set the number of the steps for the random walk. The default value is \eqn{\lfloor 10 + d/10\rfloor} for \code{'SOB'} and \eqn{1} otherwise.}
-#' \item{\code{win_len} }{ The length of the sliding window for CB or CG algorithm. The default value is \eqn{250} for CB with BiW and \eqn{400+3d^2} for CB and any other random walk and \eqn{500+4d^2} for CG.}
-#' \item{\code{hpoly} }{ A boolean parameter to use H-polytopes in MMC of CB algorithm when the input polytope is a zonotope. The default value is \code{TRUE} when the order of the zonotope is \eqn{<5}, otherwise it is \code{FALSE}.}
-#' \item{\code{seed} }{ A fixed seed for the number generator.}
+#' \describe{
+#' \item{\code{algorithm}}{A string to set the algorithm to use: a) \code{'CB'} for CB algorithm, b) \code{'SoB'} for SOB algorithm or b) \code{'CG'} for CG algorithm. The defalut algorithm is \code{'CB'}.}
+#' \item{\code{error}}{A numeric value to set the upper bound for the approximation error. The default value is \eqn{1} for SOB algorithm and \eqn{0.1} otherwise.}
+#' \item{\code{random_walk}}{A string that declares the random walk method: a) \code{'CDHR'} for Coordinate Directions Hit-and-Run, b) \code{'RDHR'} for Random Directions Hit-and-Run, c) \code{'BaW'} for Ball Walk, or \code{'BiW'} for Billiard walk. For CB algorithm the default walk is \code{'BiW'}. For CG and SOB algorithms the default walk is \code{'CDHR'} for H-polytopes and \code{'RDHR'} for the other representations.}
+#' \item{\code{walk_length}}{An integer to set the number of the steps for the random walk. The default value is \eqn{\lfloor 10 + d/10\rfloor} for \code{'SOB'} and \eqn{1} otherwise.}
+#' \item{\code{win_len}}{The length of the sliding window for CB or CG algorithm. The default value is \eqn{250} for CB with BiW and \eqn{400+3d^2} for CB and any other random walk and \eqn{500+4d^2} for CG.}
+#' \item{\code{hpoly}}{A boolean parameter to use H-polytopes in MMC of CB algorithm when the input polytope is a zonotope. The default value is \code{TRUE} when the order of the zonotope is \eqn{<5}, otherwise it is \code{FALSE}.}
+#' \item{\code{seed}}{A fixed seed for the number generator.}
 #' }
 #' @param rounding Optional. A string parameter to request a rounding method to be applied in the input polytope before volume computation: a) \code{'min_ellipsoid'}, b) \code{'svd'}, c) \code{'max_ellipsoid'} and d) \code{'none'} for no rounding.
 #'

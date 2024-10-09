@@ -5,9 +5,9 @@
 #' @param dimension The dimension of the convex polytope.
 #' @param nvertices The number of the vertices.
 #' @param generator A list that could contain two elements.
-#' \itemize{
-#' \item{body }{ the body that the generator samples uniformly the vertices from: (i) 'cube' or (ii) 'sphere', the default value is 'sphere'.}
-#' \item{seed }{ Optional. A fixed seed for the number generator.}
+#' \describe{
+#' \item{body}{the body that the generator samples uniformly the vertices from: (i) 'cube' or (ii) 'sphere', the default value is 'sphere'.}
+#' \item{seed}{Optional. A fixed seed for the number generator.}
 #' }
 #'
 #' @return A polytope class representing a V-polytope.

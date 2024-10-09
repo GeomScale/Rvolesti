@@ -12,9 +12,9 @@ gen_rand_hpoly(dimension, nfacets, generator = list(constants = "sphere"))
 \item{nfacets}{The number of the facets.}
 
 \item{generator}{A list that could contain two elements.
-\itemize{
-\item{constants }{ To declare how to set the constants \eqn{b_i} for each facets: (i) 'sphere', each hyperplane is tangent to the hypersphere of radius 10, (ii) 'uniform' for each \eqn{b_i} the generator picks a uniform number from \eqn{(0,1)}. The defalut value is 'sphere'.}
-\item{seed }{ Optional. A fixed seed for the number generator.}
+\describe{
+\item{constants}{To declare how to set the constants \eqn{b_i} for each facets: (i) 'sphere', each hyperplane is tangent to the hypersphere of radius 10, (ii) 'uniform' for each \eqn{b_i} the generator picks a uniform number from \eqn{(0,1)}. The defalut value is 'sphere'.}
+\item{seed}{Optional. A fixed seed for the number generator.}
 }}
 }
 \value{

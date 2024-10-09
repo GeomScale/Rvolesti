@@ -20,5 +20,5 @@ Imports: methods, stats, Matrix
 LinkingTo: Rcpp, RcppEigen, BH
 Suggests: testthat
 Encoding: UTF-8
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 BugReports: https://github.com/GeomScale/Rvolesti/issues
