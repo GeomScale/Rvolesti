@@ -6,6 +6,7 @@
 //Contributed and/or modified by Apostolos Chalkis, as part of Google Summer of Code 2018-19 programs.
 //Contributed and/or modified by Repouskos Panagiotis, as part of Google Summer of Code 2019 program.
 //Contributed and/or modified by Alexandros Manochis, as part of Google Summer of Code 2020 program.
+//Contributed and/or modified by Luca Perju, as part of Google Summer of Code 2024 program.
 
 // Licensed under GNU LGPL.3, see LICENCE file
 
@@ -40,22 +41,27 @@ bool is_inner_point_nan_inf(VT const& p)
 /// This class describes a polytope in H-representation or an H-polytope
 /// i.e. a polytope defined by a set of linear inequalities
 /// \tparam Point Point type
-template <typename Point>
+template 
+<
+    typename Point, 
+    typename MT_type = Eigen::Matrix<typename Point::FT, Eigen::Dynamic, Eigen::Dynamic>
+>
 class HPolytope {
 public:
     typedef Point                                             PointType;
     typedef typename Point::FT                                NT;
     typedef typename std::vector<NT>::iterator                viterator;
-    //using RowMatrixXd = Eigen::Matrix<NT, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-    //typedef RowMatrixXd MT;
-    typedef Eigen::Matrix<NT, Eigen::Dynamic, Eigen::Dynamic> MT;
+    typedef MT_type                                           MT;
     typedef Eigen::Matrix<NT, Eigen::Dynamic, 1>              VT;
+    typedef Eigen::Matrix<NT, Eigen::Dynamic, Eigen::Dynamic> DenseMT;
 
 private:
     unsigned int         _d; //dimension
     MT                   A; //matrix A
     VT                   b; // vector b, s.t.: Ax<=b
     std::pair<Point, NT> _inner_ball;
+    bool                 normalized = false; // true if the polytope is normalized
+    bool                 has_ball = false;
 
 public:
     //TODO: the default implementation of the Big3 should be ok. Recheck.
@@ -66,9 +72,15 @@ public:
     {
     }
 
+    template<typename T = DenseMT>
+    HPolytope(unsigned d_, DenseMT const& A_, VT const& b_, typename std::enable_if<!std::is_same<MT, T>::value, T>::type* = 0) :
+        _d{d_}, A{A_.sparseView()}, b{b_}
+    {
+    }
+
     // Copy constructor
-    HPolytope(HPolytope<Point> const& p) :
-            _d{p._d}, A{p.A}, b{p.b}, _inner_ball{p._inner_ball}
+    HPolytope(HPolytope<Point, MT> const& p) :
+            _d{p._d}, A{p.A}, b{p.b}, _inner_ball{p._inner_ball}, normalized{p.normalized}, has_ball{p.has_ball}
     {
     }
 
@@ -82,10 +94,10 @@ public:
         for (unsigned int i = 1; i < Pin.size(); i++) {
             b(i - 1) = Pin[i][0];
             for (unsigned int j = 1; j < _d + 1; j++) {
-                A(i - 1, j - 1) = -Pin[i][j];
+                A.coeffRef(i - 1, j - 1) = -Pin[i][j];
             }
         }
-        _inner_ball.second = -1;
+        has_ball = false;
         //_inner_ball = ComputeChebychevBall<NT, Point>(A, b);
     }
 
@@ -98,41 +110,60 @@ public:
     void set_InnerBall(std::pair<Point,NT> const& innerball) //const
     {
         _inner_ball = innerball;
+        has_ball = true;
     }
 
     void set_interior_point(Point const& r)
     {
         _inner_ball.first = r;
+        if(!is_in(r)) {
+            std::cerr << "point outside of polytope was set as interior point" << std::endl;
+            has_ball = false;
+            return;
+        }
+        if(is_normalized()) {
+            _inner_ball.second = (b - A * r.getCoefficients()).minCoeff();
+        } else {
+            _inner_ball.second = std::numeric_limits<NT>::max();
+            for(int i = 0; i < num_of_hyperplanes(); ++i) {
+                NT dist = (b(i) - A.row(i).dot(r.getCoefficients()) ) / A.row(i).norm();
+                if(dist < _inner_ball.second) {
+                    _inner_ball.second = dist;
+                }
+            }
+        }
+        has_ball = true;
     }
 
     //Compute Chebyshev ball of H-polytope P:= Ax<=b
-    //Use LpSolve library
+    //First try using max_inscribed_ball
+    //Use LpSolve library if it fails
     std::pair<Point, NT> ComputeInnerBall()
     {
         normalize();
-        #ifndef DISABLE_LPSOLVE
-            _inner_ball = ComputeChebychevBall<NT, Point>(A, b); // use lpsolve library
-        #else
+        if (!has_ball) {
+            
+            has_ball = true;
+            NT const tol = 1e-08;
+            std::tuple<VT, NT, bool> inner_ball = max_inscribed_ball(A, b, 5000, tol);
 
-            if (_inner_ball.second <= NT(0)) {
-
-                NT const tol = 1e-08;
-                std::tuple<VT, NT, bool> inner_ball = max_inscribed_ball(A, b, 5000, tol);
-
-                // check if the solution is feasible
-                if (is_in(Point(std::get<0>(inner_ball))) == 0 || std::get<1>(inner_ball) < tol/2.0 ||
-                    std::isnan(std::get<1>(inner_ball)) || std::isinf(std::get<1>(inner_ball)) ||
-                    is_inner_point_nan_inf(std::get<0>(inner_ball)))
-                {
-                    _inner_ball.second = -1.0;
-                } else
-                {
-                    _inner_ball.first = Point(std::get<0>(inner_ball));
-                    _inner_ball.second = std::get<1>(inner_ball);
-                }
+            // check if the solution is feasible
+            if (is_in(Point(std::get<0>(inner_ball))) == 0 || std::get<1>(inner_ball) < tol/2.0 ||
+                std::isnan(std::get<1>(inner_ball)) || std::isinf(std::get<1>(inner_ball)) ||
+                is_inner_point_nan_inf(std::get<0>(inner_ball))) {
+                
+                std::cerr << "Failed to compute max inscribed ball, trying to use lpsolve" << std::endl;
+                #ifndef DISABLE_LPSOLVE
+                    _inner_ball = ComputeChebychevBall<NT, Point>(A, b); // use lpsolve library
+                #else
+                    std::cerr << "lpsolve is disabled, unable to compute inner ball";
+                    has_ball = false;
+                #endif
+            } else {
+                _inner_ball.first = Point(std::get<0>(inner_ball));
+                _inner_ball.second = std::get<1>(inner_ball);
             }
-        #endif
-
+        }
         return _inner_ball;
     }
 
@@ -172,11 +203,18 @@ public:
         return b;
     }
 
+    bool is_normalized ()
+    {
+        return normalized;
+    }
+
 
     // change the matrix A
     void set_mat(MT const& A2)
     {
         A = A2;
+        normalized = false;
+        has_ball = false;
     }
 
 
@@ -184,6 +222,7 @@ public:
     void set_vec(VT const& b2)
     {
         b = b2;
+        has_ball = false;
     }
 
     Point get_mean_of_vertices() const
@@ -202,7 +241,7 @@ public:
         std::cout << " " << A.rows() << " " << _d << " double" << std::endl;
         for (unsigned int i = 0; i < A.rows(); i++) {
             for (unsigned int j = 0; j < _d; j++) {
-                std::cout << A(i, j) << " ";
+                std::cout << A.coeff(i, j) << " ";
             }
             std::cout << "<= " << b(i) << std::endl;
         }
@@ -485,7 +524,7 @@ public:
                                                      VT& Ar,
                                                      VT& Av,
                                                      NT const& lambda_prev,
-                                                     MT const& AA,
+                                                     DenseMT const& AA,
                                                      update_parameters& params) const
     {
 
@@ -501,7 +540,7 @@ public:
         if(params.hit_ball) {
             Av.noalias() += (-2.0 * inner_prev) * (Ar / params.ball_inner_norm);
         } else {
-            Av.noalias() += (-2.0 * inner_prev) * AA.col(params.facet_prev);
+            Av.noalias() += ((-2.0 * inner_prev) * AA.col(params.facet_prev));
         }
         sum_nom.noalias() = b - Ar;
 
@@ -528,6 +567,56 @@ public:
     }
 
 
+
+    template <typename update_parameters, typename set_type, typename AA_type>
+    std::pair<NT, int> line_positive_intersect(Point const& r,
+                                                     VT& Ar,
+                                                     VT& Av,
+                                                     NT const& lambda_prev,
+                                                     set_type& distances_set,
+                                                     AA_type const& AA,
+                                                     update_parameters& params) const
+    {
+        NT inner_prev = params.inner_vi_ak;
+        NT* Av_data = Av.data();
+
+        // Av += (-2.0 * inner_prev) * AA.col(params.facet_prev)
+
+        for (Eigen::SparseMatrix<double>::InnerIterator it(AA, params.facet_prev); it; ++it) {
+
+
+            // val(row) = (b(row) - Ar(row)) / Av(row) + params.moved_dist
+            // (val(row) - params.moved_dist) = (b(row) - Ar(row)) / Av(row)
+            // (val(row) - params.moved_dist) * Av(row) = b(row) - Ar(row)
+
+            *(Av_data + it.row()) += (-2.0 * inner_prev) * it.value();
+
+            // b(row) - Ar(row) = (old_val(row) - params.moved_dist) * old_Av(row) 
+            // new_val(row) = (b(row) - Ar(row)                                ) / new_Av(row) + params.moved_dist 
+            // new_val(row) = ((old_val(row) - params.moved_dist) * old_Av(row)) / new_Av(row) + params.moved_dist
+            
+            // new_val(row) = (old_val(row) - params.moved_dist) * old_Av(row)                                   / new_Av(row) + params.moved_dist;
+            // new_val(row) = (old_val(row) - params.moved_dist) * (new_Av(row) + 2.0 * inner_prev * it.value()) / new_Av(row) + params.moved_dist;
+            // new_val(row) = (old_val(row) - params.moved_dist) * (1 + (2.0 * inner_prev * it.value()) / new_Av(row) ) + params.moved_dist;
+
+            // new_val(row) = old_val(row) + (old_val(row) - params.moved_dist) * 2.0 * inner_prev * it.value() / new_Av(row)
+
+            // val(row) += (val(row) - params.moved_dist) * 2.0 * inner_prev * it.value() / *(Av_data + it.row());
+
+            NT val = distances_set.get_val(it.row());
+            val += (val - params.moved_dist) * 2.0 * inner_prev * it.value() / *(Av_data + it.row());
+            distances_set.change_val(it.row(), val, params.moved_dist);
+        }
+
+        std::pair<NT, int> ans = distances_set.get_min();
+        ans.first -= params.moved_dist;
+        params.inner_vi_ak = *(Av_data + ans.second);
+        params.facet_prev = ans.second;
+
+        return ans;
+    }
+
+
     template <typename update_parameters>
     std::pair<NT, int> line_positive_intersect(Point const& r,
                                                Point const& v,
@@ -541,7 +630,6 @@ public:
 
         NT lamda = 0;
         VT sum_nom;
-        unsigned int j;
         int m = num_of_hyperplanes(), facet;
 
         Ar.noalias() += lambda_prev*Av;
@@ -623,12 +711,12 @@ public:
 
         int m = num_of_hyperplanes();
 
-        lamdas.noalias() += A.col(rand_coord_prev)
-                         * (r_prev[rand_coord_prev] - r[rand_coord_prev]);
+        lamdas.noalias() += (DenseMT)(A.col(rand_coord_prev)
+                         * (r_prev[rand_coord_prev] - r[rand_coord_prev]));
         NT* data = lamdas.data();
 
         for (int i = 0; i < m; i++) {
-            NT a = A(i, rand_coord);
+            NT a = A.coeff(i, rand_coord);
 
             if (a == NT(0)) {
                 //std::cout<<"div0"<<std::endl;
@@ -819,9 +907,16 @@ public:
 
 
     // Apply linear transformation, of square matrix T^{-1}, in H-polytope P:= Ax<=b
-    void linear_transformIt(MT const& T)
+    template<typename T_type>
+    void linear_transformIt(T_type const& T)
     {
-        A = A * T;
+        if constexpr (std::is_same<MT, DenseMT>::value) {
+            A = A * T;
+        } else {
+            A = (A * T).sparseView();
+        }
+        normalized = false;
+        has_ball = false;
     }
 
 
@@ -830,6 +925,7 @@ public:
     void shift(const VT &c)
     {
         b -= A*c;
+        has_ball = false;
     }
 
 
@@ -859,13 +955,17 @@ public:
 
     void normalize()
     {
+        if(normalized)
+            return;
         NT row_norm;
-        for (int i = 0; i < num_of_hyperplanes(); ++i)
-        {
+        for (int i = 0; i < A.rows(); ++i) {
             row_norm = A.row(i).norm();
-            A.row(i) = A.row(i) / row_norm;
-            b(i) = b(i) / row_norm;
+            if (row_norm != 0.0) {
+                A.row(i) /= row_norm;
+                b(i) /= row_norm;
+            }
         }
+        normalized = true;
     }
 
     void compute_reflection(Point& v, Point const&, int const& facet) const
@@ -903,10 +1003,34 @@ public:
     }
 
     template <typename update_parameters>
-    void compute_reflection(Point &v, const Point &, update_parameters const& params) const {
-
+    void compute_reflection(Point &v, Point const&, update_parameters const& params) const {
             Point a((-2.0 * params.inner_vi_ak) * A.row(params.facet_prev));
             v += a;
+    }
+
+    // updates the velocity vector v and the position vector p after a reflection
+    // the real value of p is given by p + moved_dist * v
+    template <typename update_parameters>
+    auto compute_reflection(Point &v, Point &p, update_parameters const& params) const
+         -> std::enable_if_t<std::is_same_v<MT, Eigen::SparseMatrix<NT, Eigen::RowMajor>> && !std::is_same_v<update_parameters, int>, void> { // MT must be in RowMajor format
+            NT* v_data = v.pointerToData();
+            NT* p_data = p.pointerToData();
+            for(Eigen::SparseMatrix<double, Eigen::RowMajor>::InnerIterator it(A, params.facet_prev); it; ++it) {
+                *(v_data + it.col()) += (-2.0 * params.inner_vi_ak) * it.value();
+                *(p_data + it.col()) -= (-2.0 * params.inner_vi_ak * params.moved_dist) * it.value();
+            }
+    }
+
+    template <typename update_parameters>
+    NT compute_reflection(Point &v, const Point &, DenseMT const &AE, VT const &AEA, NT const &vEv, update_parameters const &params) const {
+
+            Point a((-2.0 * params.inner_vi_ak) * A.row(params.facet_prev));
+            VT x = v.getCoefficients();
+            NT new_vEv = vEv - (4.0 * params.inner_vi_ak) * (AE.row(params.facet_prev).dot(x) - params.inner_vi_ak * AEA(params.facet_prev));
+            v += a;
+            NT coeff = std::sqrt(vEv / new_vEv);
+            v = v * coeff;
+            return coeff;
     }
 
     void update_position_internal(NT&){}
