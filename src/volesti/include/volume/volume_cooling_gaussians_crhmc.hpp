@@ -1,125 +1,34 @@
 // VolEsti (volume computation and sampling library)
 
-// Copyright (c) 2012-2020 Vissarion Fisikopoulos
-// Copyright (c) 2018-2020 Apostolos Chalkis
+// Copyright (c) 2012-2024 Vissarion Fisikopoulos
+// Copyright (c) 2018-2024 Apostolos Chalkis
+// Copyright (c) 2024 Vladimir Necula
 
-//Contributed and/or modified by Apostolos Chalkis, as part of Google Summer of Code 2018 program.
+// Contributed and/or modified by Vladimir Necula, as part of Google Summer of
+// Code 2024 program.
 
 // Licensed under GNU LGPL.3, see LICENCE file
 
-#ifndef VOLUME_COOLING_GAUSSIANS_HPP
-#define VOLUME_COOLING_GAUSSIANS_HPP
+// References
+// Yunbum Kook, Yin Tat Lee, Ruoqi Shen, Santosh S. Vempala. "Sampling with
+// Riemannian Hamiltonian
+// Monte Carlo in a Constrained Space"
+#ifndef VOLUME_COOLING_GAUSSIANS_CRHMC_HPP
+#define VOLUME_COOLING_GAUSSIANS_CRHMC_HPP
 
 //#define VOLESTI_DEBUG
 
-#include <iterator>
-#include <vector>
-#include <list>
-#include <math.h>
-#include <chrono>
+#include "volume/volume_cooling_gaussians.hpp"
+#include "preprocess/crhmc/crhmc_problem.h"
 
-#include "cartesian_geom/cartesian_kernel.h"
-#include "random_walks/gaussian_helpers.hpp"
-#include "random_walks/gaussian_ball_walk.hpp"
-#include "random_walks/gaussian_cdhr_walk.hpp"
-#include "sampling/random_point_generators.hpp"
-#include "volume/math_helpers.hpp"
-
-
-/////////////////// Helpers for random walks
-
-template <typename WalkType>
-struct update_delta
-{
-    template <typename NT>
-    static void apply(WalkType, NT) {}
-};
-
-template <typename Polytope, typename RandomNumberGenerator>
-struct update_delta<GaussianBallWalk::Walk<Polytope, RandomNumberGenerator>>
-{
-    template <typename NT>
-    static void apply(GaussianBallWalk::Walk<Polytope, RandomNumberGenerator> walk,
-                      NT delta)
-    {
-        walk.update_delta(delta);
-    }
-};
-
-
-////////////////////////////// Algorithms
-
-// Gaussian Anealling
-
-// Implementation is based on algorithm from paper "A practical volume algorithm",
-// Springer-Verlag Berlin Heidelberg and The Mathematical Programming Society 2015
-// Ben Cousins, Santosh Vempala
-
-// Compute the first variance a_0 for the starting gaussian
-template <typename Polytope, typename NT>
-void get_first_gaussian(Polytope& P,
-                        NT const& frac,
-                        NT const& chebychev_radius,
-                        NT const& error,
-                        std::vector<NT> & a_vals)
-{
-    // if tol is smaller than 1e-6 no convergence can be obtained when float is used
-    NT tol = std::is_same<float, NT>::value ? 0.001 : 0.0000001;
-
-    std::vector <NT> dists = P.get_dists(chebychev_radius);
-    NT lower = 0.0;
-    NT upper = 1.0;
-
-    // Compute an upper bound for a_0
-    unsigned int i;
-    const unsigned int maxiter = 10000;
-    for (i= 1; i <= maxiter; ++i) {
-        NT sum = 0.0;
-        for (auto it = dists.begin(); it != dists.end(); ++it)
-        {
-            sum += std::exp(-upper * std::pow(*it, 2.0))
-                    / (2.0 * (*it) * std::sqrt(M_PI * upper));
-        }
-
-        if (sum > frac * error)
-        {
-            upper = upper * 10;
-        } else {
-            break;
-        }
-    }
-
-    if (i == maxiter) {
-#ifdef VOLESTI_DEBUG
-        std::cout << "Cannot obtain sharp enough starting Gaussian" << std::endl;
-#endif
-        return;
-    }
-
-    //get a_0 with binary search
-    while (upper - lower > tol)
-    {
-        NT mid = (upper + lower) / 2.0;
-        NT sum = 0.0;
-        for (auto it = dists.begin(); it != dists.end(); ++it) {
-            sum += std::exp(-mid * std::pow(*it, 2.0))
-                    / (2.0 * (*it) * std::sqrt(M_PI * mid));
-        }
-
-        if (sum < frac * error) {
-            upper = mid;
-        } else {
-            lower = mid;
-        }
-    }
-    a_vals.push_back((upper + lower) / NT(2.0));
-}
-
-
-// Compute a_{i+1} when a_i is given
 template
 <
-    typename RandomPointGenerator,
+    typename CRHMCWalkType,
+    typename crhmc_walk_params,
+    int simdLen,
+    typename Grad,
+    typename Func,
+    typename CrhmcProblem,
     typename Polytope,
     typename Point,
     typename NT,
@@ -132,7 +41,12 @@ NT get_next_gaussian(Polytope& P,
                      const NT &ratio,
                      const NT &C,
                      const unsigned int& walk_length,
-                     RandomNumberGenerator& rng)
+                     RandomNumberGenerator& rng,
+                     Grad& g,
+                     Func& f,
+                     crhmc_walk_params& parameters,
+                     CrhmcProblem& problem,
+                     CRHMCWalkType& crhmc_walk)
 {
 
     NT last_a = a;
@@ -147,8 +61,12 @@ NT get_next_gaussian(Polytope& P,
 
     //sample N points
     PushBackWalkPolicy push_back_policy;
-    RandomPointGenerator::apply(P, p, last_a, N, walk_length, randPoints,
-                                push_back_policy, rng);
+    bool raw_output = false; 
+
+    typedef CrhmcRandomPointGenerator<CRHMCWalkType> CRHMCRandomPointGenerator;
+
+    CRHMCRandomPointGenerator::apply(problem, p, N, walk_length, randPoints,
+                                    push_back_policy, rng, g, f, parameters, crhmc_walk, simdLen, raw_output);
 
     while (!done)
     {
@@ -169,7 +87,8 @@ NT get_next_gaussian(Polytope& P,
                 k = k / 2;
             }
             done = true;
-        } else {
+        } 
+        else {
             k = 2 * k;
         }
         last_ratio = mv.first;
@@ -180,8 +99,7 @@ NT get_next_gaussian(Polytope& P,
 // Compute the sequence of spherical gaussians
 template
 <
-    typename WalkType,
-    typename RandomPointGenerator,
+    int simdLen,
     typename Polytope,
     typename NT,
     typename RandomNumberGenerator
@@ -198,15 +116,40 @@ void compute_annealing_schedule(Polytope& P,
                                 RandomNumberGenerator& rng)
 {
     typedef typename Polytope::PointType Point;
-    typedef typename Polytope::VT VT;
+    typedef typename Polytope::MT 	MT;
+    
+    typedef typename GaussianFunctor::FunctionFunctor<Point>    Func;
+    typedef typename GaussianFunctor::GradientFunctor<Point>    Grad;
+    typedef typename GaussianFunctor::HessianFunctor<Point>     Hess;
+    typedef typename GaussianFunctor::parameters<NT, Point>     func_params;
+
+    typedef crhmc_input<MT, Point, Func, Grad, Hess> Input;
+    typedef crhmc_problem<Point, Input> CrhmcProblem;   
+
+    typedef ImplicitMidpointODESolver<Point, NT, CrhmcProblem, Grad, simdLen> Solver;
+
+    typedef typename CRHMCWalk::template Walk
+            <
+                    Point,
+                    CrhmcProblem,
+                    RandomNumberGenerator,
+                    Grad,
+                    Func,
+                    Solver
+            > CRHMCWalkType;
+
+    typedef typename CRHMCWalk::template parameters
+          <
+                  NT,
+                  Grad
+          > crhmc_walk_params;
+
+    typedef CrhmcRandomPointGenerator<CRHMCWalkType> CRHMCRandomPointGenerator;
+
 
     // Compute the first gaussian
+    // This uses the function from the standard volume_cooling_gaussians.hpp
     get_first_gaussian(P, frac, chebychev_radius, error, a_vals);
-
-#ifdef VOLESTI_DEBUG
-    std::cout<<"first gaussian computed\n"<<std::endl;
-#endif
-
     NT a_stop = 0.0;
     const NT tol = 0.001;
     unsigned int it = 0;
@@ -216,35 +159,76 @@ void compute_annealing_schedule(Polytope& P,
     if (a_vals[0]<a_stop) a_vals[0] = a_stop;
 
 #ifdef VOLESTI_DEBUG
+    std::cout<<"first gaussian computed "<< a_vals[0] <<std::endl;
+#endif
+
+#ifdef VOLESTI_DEBUG
     std::cout<<"Computing the sequence of gaussians..\n"<<std::endl;
 #endif
 
-    Point p(n);
-
     while (true)
     {
-        // Compute the next gaussian
-        NT next_a = get_next_gaussian<RandomPointGenerator>
-                      (P, p, a_vals[it], N, ratio, C, walk_length, rng);
 
         NT curr_fn = 0;
         NT curr_its = 0;
         auto steps = totalSteps;
 
-        WalkType walk(P, p, a_vals[it], rng);
-        //TODO: test update delta here?
+        //TODO: potential problem creation and preprocessing optimization
+        
+        //create the crhmc problem for this variance
+        int dimension = P.dimension();
+        func_params f_params = func_params(Point(dimension), a_vals[it], 1);
+        
+        Func f(f_params);
+        Grad g(f_params);
+        Hess h(f_params);
 
-        update_delta<WalkType>
-                ::apply(walk, 4.0 * chebychev_radius
-                        / std::sqrt(std::max(NT(1.0), a_vals[it]) * NT(n)));
+        Input input = convert2crhmc_input<Input, Polytope, Func, Grad, Hess>(P, f, g, h);
+
+        typedef crhmc_problem<Point, Input> CrhmcProblem;
+        CrhmcProblem problem = CrhmcProblem(input);
+
+        Point p = Point(problem.center);
+
+        if(problem.terminate){return;}
+
+        problem.options.simdLen = simdLen;
+        crhmc_walk_params params(input.df, p.dimension(), problem.options);
+
+        if (input.df.params.eta > 0) {
+            params.eta = input.df.params.eta;
+        }
+
+        int dim;
+        dim = p.dimension();
+
+        //create the walk object for this problem
+        CRHMCWalkType walk = CRHMCWalkType(problem, p, input.df, input.f, params);
+
+        // Compute the next gaussian
+        NT next_a = get_next_gaussian<CRHMCWalkType, crhmc_walk_params, simdLen, Grad, Func, CrhmcProblem>
+                      (P, p, a_vals[it], N, ratio, C, walk_length, rng, g, f, params, problem, walk);
+
+#ifdef VOLESTI_DEBUG
+    std::cout<<"Next Gaussian " << next_a <<std::endl;
+#endif
 
         // Compute some ratios to decide if this is the last gaussian
         for (unsigned  int j = 0; j < steps; j++)
         {
-            walk.apply(P, p, a_vals[it], walk_length, rng);
+            walk.apply(rng, walk_length);
+            p = walk.getPoint();
+#ifdef VOLESTI_DEBUG
+    std::cout<<"Walk point " << std::endl;
+    p.print();
+#endif
             curr_its += 1.0;
             curr_fn += eval_exp(p, next_a) / eval_exp(p, a_vals[it]);
         }
+
+#ifdef VOLESTI_DEBUG
+    std::cout<<"Condition function ratio " << curr_fn/curr_its <<std::endl;
+#endif
 
         // Remove the last gaussian.
         // Set the last a_i equal to zero
@@ -262,32 +246,16 @@ void compute_annealing_schedule(Polytope& P,
             break;
         }
     }
+#ifdef VOLESTI_DEBUG
+    std::cout<<"first gaussian after WHILE "<< a_vals[0] <<std::endl;
+#endif
 }
-
-template <typename NT>
-struct gaussian_annealing_parameters
-{
-    gaussian_annealing_parameters(unsigned int d)
-        :   frac(0.1)
-        ,   ratio(NT(1)-NT(1)/(NT(d)))
-        ,   C(NT(2))
-        ,   N(500 * ((int) C) + ((int) (d * d / 2)))
-        ,   W(6*d*d+800)
-    {}
-
-    NT frac;
-    NT ratio;
-    NT C;
-    unsigned int N;
-    unsigned int W;
-};
 
 template
 <
-    typename WalkTypePolicy,
     typename Polytope,
-    typename RandomNumberGenerator
-
+    typename RandomNumberGenerator,
+    int simdLen = 8
 >
 double volume_cooling_gaussians(Polytope& Pin,
                                 RandomNumberGenerator& rng,
@@ -295,23 +263,41 @@ double volume_cooling_gaussians(Polytope& Pin,
                                 unsigned int const& walk_length = 1)
 {
     typedef typename Polytope::PointType Point;
-    typedef typename Point::FT NT;
+    typedef typename Point::FT 	NT;
     typedef typename Polytope::VT 	VT;
-    typedef typename WalkTypePolicy::template Walk
-                                              <
-                                                    Polytope,
-                                                    RandomNumberGenerator
-                                              > WalkType;
-    typedef GaussianRandomPointGenerator<WalkType> RandomPointGenerator;
+    typedef typename Polytope::MT 	MT;
+    typedef typename GaussianFunctor::FunctionFunctor<Point>    Func;
+    typedef typename GaussianFunctor::GradientFunctor<Point>    Grad;
+    typedef typename GaussianFunctor::HessianFunctor<Point>     Hess;
+    typedef typename GaussianFunctor::parameters<NT, Point>     func_params;
 
-    //const NT maxNT = std::numeric_limits<NT>::max();//1.79769e+308;
-    //const NT minNT = std::numeric_limits<NT>::min();//-1.79769e+308;
+    typedef crhmc_input<MT, Point, Func, Grad, Hess> Input;
+    typedef crhmc_problem<Point, Input> CrhmcProblem;   
+
+    typedef ImplicitMidpointODESolver<Point, NT, CrhmcProblem, Grad, simdLen> Solver;
+
+    typedef typename CRHMCWalk::template Walk
+            <
+                    Point,
+                    CrhmcProblem,
+                    RandomNumberGenerator,
+                    Grad,
+                    Func,
+                    Solver
+            > CRHMCWalkType;
+
+    typedef typename CRHMCWalk::template parameters
+          <
+                  NT,
+                  Grad
+          > crhmc_walk_params;
+    
+    typedef CrhmcRandomPointGenerator<CRHMCWalkType> CRHMCRandomPointGenerator;
 
     auto P(Pin); //copy and work with P because we are going to shift
     unsigned int n = P.dimension();
     unsigned int m = P.num_of_hyperplanes();
     gaussian_annealing_parameters<NT> parameters(P.dimension());
-    //RandomNumberGenerator rng(n);
 
     // Consider Chebychev center as an internal point
     auto InnerBall = P.ComputeInnerBall();
@@ -335,11 +321,7 @@ double volume_cooling_gaussians(Polytope& Pin,
     NT C = parameters.C;
     unsigned int N = parameters.N;
 
-    compute_annealing_schedule
-    <
-        WalkType,
-        RandomPointGenerator
-    >(P, ratio, C, parameters.frac, N, walk_length, radius, error, a_vals, rng);
+    compute_annealing_schedule<simdLen>(P, ratio, C, parameters.frac, N, walk_length, radius, error, a_vals, rng);
 
 #ifdef VOLESTI_DEBUG
     std::cout<<"All the variances of schedule_annealing computed in = "
@@ -360,13 +342,13 @@ double volume_cooling_gaussians(Polytope& Pin,
     VT lamdas;
     lamdas.setZero(m);
     NT vol = std::pow(M_PI/a_vals[0], (NT(n))/2.0);
-    Point p(n); // The origin is the Chebychev center of the Polytope
     unsigned int i=0;
 
     typedef typename std::vector<NT>::iterator viterator;
     viterator itsIt = its.begin();
     viterator avalsIt = a_vals.begin();
     viterator minmaxIt;
+
 
 #ifdef VOLESTI_DEBUG
     std::cout<<"volume of the first gaussian = "<<vol<<"\n"<<std::endl;
@@ -390,16 +372,36 @@ double volume_cooling_gaussians(Polytope& Pin,
         std::vector<NT> last_W = last_W2;
 
         // Set the radius for the ball walk
-        WalkType walk(P, p, *avalsIt, rng);
+        //creating the walk object
+        int dimension = P.dimension();
+        func_params f_params = func_params(Point(dimension), *avalsIt, 1);
+        
+        Func f(f_params);
+        Grad g(f_params);
+        Hess h(f_params);
 
-        update_delta<WalkType>
-                ::apply(walk, 4.0 * radius
-                         / std::sqrt(std::max(NT(1.0), *avalsIt) * NT(n)));
+        //create the crhmc problem
+        Input input = convert2crhmc_input<Input, Polytope, Func, Grad, Hess>(P, f, g, h);
+
+        CrhmcProblem problem = CrhmcProblem(input);
+
+        Point p = Point(problem.center);
+
+        if(problem.terminate){return 0;}
+
+        problem.options.simdLen=simdLen;
+        crhmc_walk_params params(input.df, p.dimension(), problem.options);
+
+        if (input.df.params.eta > 0) {
+            params.eta = input.df.params.eta;
+        }
+
+        CRHMCWalkType walk = CRHMCWalkType(problem, p, input.df, input.f, params);
 
         while (!done || (*itsIt)<min_steps)
         {
-            walk.apply(P, p, *avalsIt, walk_length, rng);
-
+            walk.apply(rng, walk_length);
+            p = walk.getPoint();
             *itsIt = *itsIt + 1.0;
             *fnIt = *fnIt + eval_exp(p,*(avalsIt+1)) / eval_exp(p,*avalsIt);
             NT val = (*fnIt) / (*itsIt);
@@ -454,37 +456,4 @@ double volume_cooling_gaussians(Polytope& Pin,
     return vol;
 }
 
-
-template
-<
-    typename WalkTypePolicy = GaussianCDHRWalk,
-    typename RandomNumberGenerator = BoostRandomNumberGenerator<boost::mt11213b, double>,
-    typename Polytope
->
-double volume_cooling_gaussians(Polytope &Pin,
-                                 double const& error = 0.1,
-                                 unsigned int const& walk_length = 1)
-{
-    RandomNumberGenerator rng(Pin.dimension());
-    return volume_cooling_gaussians<WalkTypePolicy>(Pin, rng, error, walk_length);
-}
-
-
-template
-<
-    typename WalkTypePolicy = GaussianCDHRWalk,
-    typename RandomNumberGenerator = BoostRandomNumberGenerator<boost::mt11213b, double>,
-    typename Polytope
->
-double volume_cooling_gaussians(Polytope &Pin,
-                                Cartesian<double>::Point const& interior_point,
-                                unsigned int const& walk_length = 1,
-                                double const& error = 0.1)
-{
-    RandomNumberGenerator rng(Pin.dimension());
-    Pin.set_interior_point(interior_point);
-
-    return volume_cooling_gaussians<WalkTypePolicy>(Pin, rng, error, walk_length);
-}
-
-#endif // VOLUME_COOLING_GAUSSIANS_HPP
+#endif // VOLUME_COOLING_GAUSSIANS_CRHMC_HPP

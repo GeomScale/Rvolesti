@@ -4,6 +4,7 @@
 // Copyright (c) 2018-2020 Apostolos Chalkis
 
 // Contributed and/or modified by Alexandros Manochis, as part of Google Summer of Code 2020 program.
+// Contributed and/or modified by Luca Perju, as part of Google Summer of Code 2024 program.
 
 // Licensed under GNU LGPL.3, see LICENCE file
 
@@ -11,6 +12,126 @@
 #define RANDOM_WALKS_ACCELERATED_IMPROVED_BILLIARD_WALK_HPP
 
 #include "sampling/sphere.hpp"
+#include <Eigen/Eigen>
+#include <set>
+#include <vector>
+
+const double eps = 1e-10;
+
+// data structure which maintains the values of (b - Ar)/Av, and can extract the minimum positive value and the facet associated with it
+// vec[i].first contains the value of (b(i) - Ar(i))/Av(i) + moved_dist, where moved_dist is the total distance that the point has travelled so far
+// The heap will only contain the values from vec which are greater than moved_dist (so that they are positive)
+template<typename NT>
+class BoundaryOracleHeap {
+public:
+    int n, heap_size;
+    std::vector<std::pair<NT, int>> heap;
+    std::vector<std::pair<NT, int>> vec;
+
+private:
+    int siftDown(int index) {
+        while((index << 1) + 1 < heap_size) {
+            int child = (index << 1) + 1;
+            if(child + 1 < heap_size && heap[child + 1].first < heap[child].first - eps) {
+                child += 1;
+            }
+            if(heap[child].first < heap[index].first - eps)
+            {
+                std::swap(heap[child], heap[index]);
+                std::swap(vec[heap[child].second].second, vec[heap[index].second].second);
+                index = child;
+            } else {
+                return index;
+            }
+        }
+        return index;
+    }
+
+    int siftUp(int index) {
+        while(index > 0 && heap[(index - 1) >> 1].first - eps > heap[index].first) {
+            std::swap(heap[(index - 1) >> 1], heap[index]);
+            std::swap(vec[heap[(index - 1) >> 1].second].second, vec[heap[index].second].second);
+            index = (index - 1) >> 1;
+        }
+        return index;
+    }
+
+    // takes the index of a facet, and (in case it is in the heap) removes it from the heap.
+    void remove (int index) {
+        index = vec[index].second;
+        if(index == -1) {
+            return;
+        }
+        std::swap(heap[heap_size - 1], heap[index]);
+        std::swap(vec[heap[heap_size - 1].second].second, vec[heap[index].second].second);
+        vec[heap[heap_size - 1].second].second = -1;
+        heap_size -= 1;
+        index = siftDown(index);
+        siftUp(index);
+    }
+
+    // inserts a new value into the heap, with its associated facet
+    void insert (const std::pair<NT, int> val) {
+        vec[val.second].second = heap_size;
+        vec[val.second].first = val.first;
+        heap[heap_size++] = val;
+        siftUp(heap_size - 1);
+    }
+
+public:
+    BoundaryOracleHeap() {}
+
+    BoundaryOracleHeap(int n) : n(n), heap_size(0) {
+        heap.resize(n);
+        vec.resize(n);
+    }
+
+    // rebuilds the heap with the existing values from vec
+    // O(n)
+    void rebuild (const NT &moved_dist) {
+        heap_size = 0;
+        for(int i = 0; i < n; ++i) {
+            vec[i].second = -1;
+            if(vec[i].first - eps > moved_dist) {
+                vec[i].second = heap_size;
+                heap[heap_size++] = {vec[i].first, i};
+            }
+        }
+        for(int i = heap_size - 1; i >= 0; --i) {
+            siftDown(i);
+        }
+    }
+
+    // returns (b(i) - Ar(i))/Av(i) + moved_dist
+    // O(1)
+    NT get_val (const int &index) {
+        return vec[index].first;
+    }
+
+    // returns the nearest facet
+    // O(1)
+    std::pair<NT, int> get_min () {
+        return heap[0];
+    }
+
+    // changes the stored value for a given facet, and updates the heap accordingly
+    // O(logn)
+    void change_val(const int& index, const NT& new_val, const NT& moved_dist) {
+        if(new_val < moved_dist - eps) {
+            vec[index].first = new_val;
+            remove(index);
+        } else {
+            if(vec[index].second == -1) {
+                insert({new_val, index});
+            } else {
+                heap[vec[index].second].first = new_val;
+                vec[index].first = new_val;
+                siftDown(vec[index].second);
+                siftUp(vec[index].second);
+            }
+        }
+    }
+};
 
 
 // Billiard walk which accelarates each step for uniform distribution
@@ -37,35 +158,46 @@ struct AcceleratedBilliardWalk
     struct update_parameters
     {
         update_parameters()
-                :   facet_prev(0), hit_ball(false), inner_vi_ak(0.0), ball_inner_norm(0.0)
+                :   facet_prev(0), hit_ball(false), inner_vi_ak(0.0), ball_inner_norm(0.0), moved_dist(0.0)
         {}
         int facet_prev;
         bool hit_ball;
         double inner_vi_ak;
         double ball_inner_norm;
+        double moved_dist;
     };
 
     parameters param;
 
 
     template
-            <
-                    typename Polytope,
-                    typename RandomNumberGenerator
-            >
+    <
+            typename Polytope,
+            typename RandomNumberGenerator
+    >
     struct Walk
     {
         typedef typename Polytope::PointType Point;
         typedef typename Polytope::MT MT;
+        typedef typename Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> DenseMT;
         typedef typename Point::FT NT;
+        using AA_type = std::conditional_t< std::is_same_v<MT, typename Eigen::SparseMatrix<NT, Eigen::RowMajor>>, typename Eigen::SparseMatrix<NT>, DenseMT >; 
+        // AA is sparse colMajor if MT is sparse rowMajor, and Dense otherwise
 
         template <typename GenericPolytope>
         Walk(GenericPolytope &P, Point const& p, RandomNumberGenerator &rng)
         {
+            if(!P.is_normalized()) {
+                P.normalize();
+            }
             _update_parameters = update_parameters();
             _L = compute_diameter<GenericPolytope>
                 ::template compute<NT>(P);
-            _AA.noalias() = P.get_mat() * P.get_mat().transpose();
+            if constexpr (std::is_same<AA_type, Eigen::SparseMatrix<NT>>::value) {
+                _AA = (P.get_mat() * P.get_mat().transpose());
+            } else {
+                _AA.noalias() = (DenseMT)(P.get_mat() * P.get_mat().transpose());
+            }
             _rho = 1000 * P.dimension(); // upper bound for the number of reflections (experimental)
             initialize(P, p, rng);
         }
@@ -74,11 +206,18 @@ struct AcceleratedBilliardWalk
         Walk(GenericPolytope &P, Point const& p, RandomNumberGenerator &rng,
              parameters const& params)
         {
+            if(!P.is_normalized()) {
+                P.normalize();
+            }
             _update_parameters = update_parameters();
             _L = params.set_L ? params.m_L
                               : compute_diameter<GenericPolytope>
                                 ::template compute<NT>(P);
-            _AA.noalias() = P.get_mat() * P.get_mat().transpose();
+            if constexpr (std::is_same<AA_type, Eigen::SparseMatrix<NT>>::value) {
+                _AA = (P.get_mat() * P.get_mat().transpose());
+            } else {
+                _AA.noalias() = (DenseMT)(P.get_mat() * P.get_mat().transpose());
+            }
             _rho = 1000 * P.dimension(); // upper bound for the number of reflections (experimental)
             initialize(P, p, rng);
         }
@@ -96,6 +235,12 @@ struct AcceleratedBilliardWalk
             NT T;
             const NT dl = 0.995;
             int it;
+            typename Point::Coeff b;
+            NT* b_data;
+            if constexpr (std::is_same<MT, Eigen::SparseMatrix<NT, Eigen::RowMajor>>::value) {
+                b = P.get_vec();
+                b_data = b.data();
+            }
 
             for (auto j=0u; j<walk_length; ++j)
             {
@@ -104,8 +249,8 @@ struct AcceleratedBilliardWalk
                 Point p0 = _p;
 
                 it = 0;
-                std::pair<NT, int> pbpair = P.line_positive_intersect(_p, _v, _lambdas, _Av,
-                                                                      _lambda_prev, _update_parameters);
+                std::pair<NT, int> pbpair = P.line_first_positive_intersect(_p, _v, _lambdas, _Av, _update_parameters);
+                
                 if (T <= pbpair.first) {
                     _p += (T * _v);
                     _lambda_prev = T;
@@ -113,28 +258,52 @@ struct AcceleratedBilliardWalk
                 }
 
                 _lambda_prev = dl * pbpair.first;
-                _p += (_lambda_prev * _v);
+                if constexpr (std::is_same<MT, Eigen::SparseMatrix<NT, Eigen::RowMajor>>::value) {
+                    _update_parameters.moved_dist = _lambda_prev;
+                    NT* Ar_data = _lambdas.data();
+                    NT* Av_data = _Av.data();
+                    for(int i = 0; i < P.num_of_hyperplanes(); ++i) {
+                        _distances_set.vec[i].first = ( *(b_data + i) - (*(Ar_data + i)) ) / (*(Av_data + i));
+                    }
+                    // rebuild the heap with the new values of (b - Ar) / Av
+                    _distances_set.rebuild(_update_parameters.moved_dist);
+                } else {
+                    _p += (_lambda_prev * _v);
+                }
                 T -= _lambda_prev;
                 P.compute_reflection(_v, _p, _update_parameters);
                 it++;
 
                 while (it < _rho)
-                {
-                    std::pair<NT, int> pbpair
-                            = P.line_positive_intersect(_p, _v, _lambdas, _Av, _lambda_prev,
-                                                        _AA, _update_parameters);
+                {   
+                    std::pair<NT, int> pbpair;
+                    if constexpr (std::is_same<MT, Eigen::SparseMatrix<NT, Eigen::RowMajor>>::value) {
+                        pbpair = P.line_positive_intersect(_p, _lambdas, _Av, _lambda_prev,
+                                                           _distances_set, _AA, _update_parameters);
+                    } else {
+                        pbpair = P.line_positive_intersect(_p, _v, _lambdas, _Av, _lambda_prev,
+                                                           _AA, _update_parameters);
+                    }
                     if (T <= pbpair.first) {
                         _p += (T * _v);
                         _lambda_prev = T;
                         break;
                     }
                     _lambda_prev = dl * pbpair.first;
-                    _p += (_lambda_prev * _v);
+                    if constexpr (std::is_same<MT, Eigen::SparseMatrix<NT, Eigen::RowMajor>>::value) {
+                        _update_parameters.moved_dist += _lambda_prev;
+                    } else {
+                        _p += (_lambda_prev * _v);
+                    }
                     T -= _lambda_prev;
                     P.compute_reflection(_v, _p, _update_parameters);
                     it++;
                 }
-                if (it == _rho) _p = p0;
+                _p += _update_parameters.moved_dist * _v;
+                _update_parameters.moved_dist = 0.0;
+                if (it == _rho) {
+                    _p = p0;
+                }
             }
             p = _p;
         }
@@ -185,8 +354,7 @@ struct AcceleratedBilliardWalk
 
                 apply(P, p, walk_length, rng);
                 max_dist = get_max_distance(pointset, p, rad);
-                if (max_dist > Lmax) 
-                {
+                if (max_dist > Lmax) {
                     Lmax = max_dist;
                 }
                 if (2.0*rad > Lmax) {
@@ -196,8 +364,7 @@ struct AcceleratedBilliardWalk
             }
 
             if (Lmax > _L) {
-                if (P.dimension() <= 2500) 
-                {
+                if (P.dimension() <= 2500) {
                     update_delta(Lmax);
                 }
                 else{
@@ -235,6 +402,7 @@ struct AcceleratedBilliardWalk
             _Av.setZero(P.num_of_hyperplanes());
             _p = p;
             _v = GetDirection<Point>::apply(n, rng);
+            _distances_set = BoundaryOracleHeap<NT>(P.num_of_hyperplanes());
 
             NT T = -std::log(rng.sample_urdist()) * _L;
             Point p0 = _p;
@@ -296,11 +464,12 @@ struct AcceleratedBilliardWalk
         Point _p;
         Point _v;
         NT _lambda_prev;
-        MT _AA;
+        AA_type _AA;
         unsigned int _rho;
         update_parameters _update_parameters;
         typename Point::Coeff _lambdas;
         typename Point::Coeff _Av;
+        BoundaryOracleHeap<NT> _distances_set;
     };
 
 };
