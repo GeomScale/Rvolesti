@@ -17,8 +17,8 @@ gen_rand_zonotope(
 
 \item{generator}{A list that could contain two elements.
 \describe{
-\item{distribution}{ the distribution to pick the length of each segment from \eqn{[0,100]}: (i) 'uniform', (ii) 'gaussian' or (iii) 'exponential', the default value is 'uniform.}
-\item {seed}{Optional. A fixed seed for the number generator.}
+\item{distribution}{The distribution to pick the length of each segment from \eqn{[0,100]}: (i) 'uniform', (ii) 'gaussian' or (iii) 'exponential', the default value is 'uniform.}
+\item{seed}{Optional. A fixed seed for the number generator.}
 }}
 }
 \value{
