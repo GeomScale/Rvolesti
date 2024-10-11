@@ -6,13 +6,13 @@
 #'
 #' @param returns A \eqn{d}-dimensional vector that describes the direction of the first family of parallel hyperplanes.
 #' @param parameters A list to set a parameterization.
-#' \itemize{
-#' \item{win_length }{ The length of the sliding window. The default value is 60.}
-#' \item{m } { The number of slices for the copula. The default value is 100.}
-#' \item{n }{ The number of points to sample. The default value is \eqn{5\cdot 10^5}.}
-#' \item{nwarning }{ The number of consecutive indicators larger than 1 required to declare a warning period. The default value is 60.}
-#' \item{ncrisis }{ The number of consecutive indicators larger than 1 required to declare a crisis period. The default value is 100.}
-#' \item{seed }{ A fixed seed for the number generator.}
+#' \describe{
+#' \item{win_length}{The length of the sliding window. The default value is 60.}
+#' \item{m}{The number of slices for the copula. The default value is 100.}
+#' \item{n}{The number of points to sample. The default value is \eqn{5\cdot 10^5}.}
+#' \item{nwarning}{The number of consecutive indicators larger than 1 required to declare a warning period. The default value is 60.}
+#' \item{ncrisis}{The number of consecutive indicators larger than 1 required to declare a crisis period. The default value is 100.}
+#' \item{seed}{A fixed seed for the number generator.}
 #' }
 #'
 #' @references \cite{L. Cales, A. Chalkis, I.Z. Emiris, V. Fisikopoulos,

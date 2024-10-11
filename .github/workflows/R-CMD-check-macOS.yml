@@ -1,7 +1,7 @@
 ##############################################################################
 # GitHub Actions Workflow to test the R interface of volesti
 #
-# Copyright (c) 2020 Vissarion Fisikopoulos
+# Copyright (c) 2020-2024 Vissarion Fisikopoulos
 #
 # Licensed under GNU LGPL.3, see LICENCE file
 ##############################################################################
@@ -20,8 +20,20 @@ jobs:
       fail-fast: false
       matrix:
         config:
+          ## incompatible versions of gfortran and R
           - {os: macOS-latest,   r: '4.1.2'}
+          ## building with clang 15 yields a compile error from external/PackedCSparse/FloatArray.h:11:
+          ## error "This header is only meant to be used on x86 and x64 architecture"
           - {os: macOS-latest,   r: 'release'}
+          ## In file included from direct_sampling.cpp:19:
+          ## In file included from volesti/include/volume/volume_sequence_of_balls.hpp:21:
+          ## volesti/include/convex_bodies/hpolytope.h:1015:35: error: no template named 'is_same_v' in namespace 'std'; did you mean 'is_same'?
+          ##  -> std::enable_if_t<std::is_same_v<MT, Eigen::SparseMatrix<NT, Eigen::RowMajor>> && !std::is_same_v<update_parameters, int>, void> { // MT must be in RowMajor format
+          - {os: macOS-13,   r: '4.1.2'}
+          - {os: macOS-12,   r: '4.1.2'}
+          ## pass without errors
+          - {os: macOS-13,   r: 'release'}
+          - {os: macOS-12,   r: 'release'}
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
@@ -47,7 +59,7 @@ jobs:
 
       - name: Upload check results
         if: failure()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ runner.os }}-r${{ matrix.config.r }}-results
           path: check
