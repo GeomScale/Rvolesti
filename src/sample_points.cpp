@@ -9,6 +9,7 @@
 
 // Contributed and/or modified by Alexandros Manochis, as part of Google Summer of Code 2020 program.
 
+// Contributed and/or modified by Iva Janković, as part of Google Summer of Code 2025 program.
 
 #include <Rcpp.h>
 #include <RcppEigen.h>
@@ -24,6 +25,7 @@
 #include "ode_solvers/ode_solvers.hpp"
 #include "oracle_functors_rcpp.h"
 #include "preprocess/crhmc/constraint_problem.h"
+#include "preprocess/feasible_point.hpp"
 
 enum random_walks {
   ball_walk,
@@ -31,6 +33,8 @@ enum random_walks {
   cdhr,
   billiard,
   accelarated_billiard,
+  shake_and_bake,
+  billiard_shake_bake,
   dikin_walk,
   vaidya_walk,
   john_walk,
@@ -60,7 +64,8 @@ void sample_from_polytope(Polytope &P, int type, RNGType &rng, PointList &randPo
                           Point const& StartingPoint, unsigned int const& nburns,
                           bool const& set_L, random_walks walk,
                           NegativeGradientFunctor *F=NULL, NegativeLogprobFunctor *f=NULL,
-                          HessianFunctor *h=NULL, ode_solvers solver_type = no_solver)
+                          HessianFunctor *h=NULL, ode_solvers solver_type = no_solver,
+                          int facet_index=-1, int nreflections=-1)
 {
     switch (walk)
     {
@@ -134,6 +139,14 @@ void sample_from_polytope(Polytope &P, int type, RNGType &rng, PointList &randPo
             uniform_sampling<AcceleratedBilliardWalk>(randPoints, P, rng, walkL, numpoints,
                                                       StartingPoint, nburns);
         }
+        break;
+    case shake_and_bake:
+        shakeandbake_sampling<ShakeAndBakeWalk>(randPoints, P, rng, walkL, numpoints, 
+                                                StartingPoint, nburns, facet_index);
+        break;
+    case billiard_shake_bake:
+        billiard_shakeandbake_sampling<BilliardShakeAndBakeWalk>(randPoints, P, rng, walkL,nreflections, numpoints, 
+                                                                 StartingPoint, nburns, facet_index);
         break;
     case gaussian_hmc:
         if(set_L) {
@@ -232,18 +245,20 @@ bool is_walk(Rcpp::Nullable<Rcpp::List> random_walk, std::string str) {
 //' x) \code{'NUTS'} for NUTS Hamiltonian Monte Carlo sampler (logconcave densities), xi) \code{'HMC'} for Hamiltonian Monte Carlo  (logconcave densities),
 //' xii) CRHMC for Riemannian HMC with H-polytope constraints (uniform and general logconcave densities),
 //' xiii) \code{'ULD'} for Underdamped Langevin Dynamics using the Randomized Midpoint Method (logconcave densities),
-//' xiii) \code{'ExactHMC'} for exact Hamiltonian Monte Carlo with reflections (spherical Gaussian or exponential distribution).
+//' xiii) \code{'ExactHMC'} for exact Hamiltonian Monte Carlo with reflections (spherical Gaussian or exponential distribution)
+//' xiv) \code{'SB'} for Running variant of Shake and Bake algorithm and \code{'BSB'} for hybrid algorithm = Billiard + Running Shake and Bake, both for uniform boundary sampling.
 //' The default walk is \code{'aBiW'} for the uniform distribution, \code{'CDHR'} for the Gaussian distribution and H-polytopes and
 //' \code{'BiW'} or \code{'RDHR'} for the same distributions and V-polytopes and zonotopes. \code{'NUTS'} is the default sampler for logconcave densities and \code{'CRHMC'}
 //' for logconcave densities with H-polytope and sparse constrainted problems.}
 //' \item{\code{walk_length}}{The number of the steps per generated point for the random walk. The default value is \eqn{1}.}
 //' \item{\code{nburns}}{The number of points to burn before start sampling. The default value is \eqn{1}.}
-//' \item{\code{starting_point}}{A \eqn{d}-dimensional numerical vector that declares a starting point in the interior of the polytope for the random walk. The default choice is the center of the ball as that one computed by the function \code{inner_ball()}.}
+//' \item{\code{starting_point}}{A \eqn{d}-dimensional numerical vector that declares a starting point in the interior of the polytope for the random walk. The default choice is the center of the ball as that one computed by the function \code{inner_ball()}.Exception is for (Billiard) Shake and Bake where starting point is on the boundary of the polytope!}
 //' \item{\code{BaW_rad}}{The radius for the ball walk.}
 //' \item{\code{L}}{The maximum length of the billiard trajectory or the radius for the step of dikin, vaidya or john walk.}
 //' \item{\code{solver}}{Specify ODE solver for logconcave sampling. Options are i) leapfrog, ii) euler iii) runge-kutta iv) richardson}
 //' \item{\code{step_size}}{Optionally chosen step size for logconcave sampling. Defaults to a theoretical value if not provided.}
-//' }
+//' \item{\code{facet_index}}{Optionally chosen a facet for the Starting Point (for SB and BSB)}
+//' \item{\code{nreflections}}{Optionally chosen a number of reflections in between Running Shake and Bake (just for BSB)}
 //' @param distribution Optional. A list that declares the target density and some related parameters as follows:
 //' \describe{
 //' \item{\code{density}}{A string: (a) \code{'uniform'} for the uniform distribution or b) \code{'gaussian'} for the multidimensional spherical distribution c) \code{logconcave} with form proportional to exp(-f(x)) where f(x) is L-smooth and m-strongly-convex d) \code{'exponential'} for the exponential distribution. The default target distribution is the uniform distribution.}
@@ -275,6 +290,9 @@ bool is_walk(Rcpp::Nullable<Rcpp::List> random_walk, std::string str) {
 //' @references \cite{Augustin Chevallier, Sylvain Pion, Frederic Cazals,
 //' \dQuote{"Hamiltonian Monte Carlo with boundary reflections, and application to polytope volume calculations,"} \emph{Research Report preprint hal-01919855}, 2018.}
 //'
+//' @references \cite{Boender CGE, Caron Richard J, McDonald J Fred, Kan AHG Rinnooy, Romeijn H Edwin, Smith Robert L, Telgen Jan, Vorst ACF
+//' \dQuote{"hake-and-bake algorithms for generating uniform points on the boundary of bounded polyhedra,"} \emph{Operations Research,} 1991.}.
+//'
 //' @return A \eqn{d\times n} matrix that contains, column-wise, the sampled points from the convex polytope P.
 //' @examples
 //' # uniform distribution from the 3d unit cube in H-representation using ball walk
@@ -304,7 +322,8 @@ Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
     typedef double NT;
     typedef Cartesian<NT>    Kernel;
     typedef BoostRandomNumberGenerator<boost::mt19937, NT> RNGType;
-    typedef typename Kernel::Point    Point;
+    typedef typename Kernel::Point Point;
+    typedef typename Point::FT FT;
     typedef HPolytope <Point> Hpolytope;
     typedef VPolytope<Point> Vpolytope;
     typedef Zonotope <Point> zonotope;
@@ -359,6 +378,8 @@ Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
     NT radius = 1.0;
     NT L;
     NT eta = -1;
+    int facet_index; // Used only for Shake and Bake sampling
+    int nreflections; // Used only for Billiard Shake and Bake sampling
 
     bool set_mode = false;
     bool gaussian = false;
@@ -575,6 +596,22 @@ Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
             set_L = true;
             if (L <= 0.0) throw Rcpp::exception("L must be a postitive number!");
         }
+    } else if (is_walk(random_walk, std::string("SB"))) {
+        if (gaussian || exponential) throw Rcpp::exception("Gaussian/ exponential Shake and Bake sampling is not supported!");
+        if (type !=1) {
+            throw Rcpp::exception("Shake and Bake sampling is supported only for H-polytopes !");
+        }
+        walk = shake_and_bake;
+    } else if (is_walk(random_walk, std::string("BSB"))) {
+        if (gaussian || exponential) throw Rcpp::exception("Gaussian/ exponential Billiard Shake and Bake sampling is not supported!");
+        if (type !=1) {
+            throw Rcpp::exception("Billiard Shake and Bake sampling is supported only for H-polytopes !");
+        }
+        if (Rcpp::as<Rcpp::List>(random_walk).containsElementNamed("nreflections")) {
+            nreflections = Rcpp::as<NT>(Rcpp::as<Rcpp::List>(random_walk)["nreflections"]);
+            if (nreflections <= 0.0) throw Rcpp::exception("Number of reflections must be a postitive number!");
+        }
+        walk = billiard_shake_bake;
     } else if (is_walk(random_walk, std::string("BRDHR"))) {
         if (gaussian || exponential) throw Rcpp::exception("Gaussian sampling from the boundary is not supported!");
         walk = brdhr;
@@ -639,26 +676,36 @@ Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
             // Hpolytope
             Hpolytope HP(dim, Rcpp::as<MT>(P.slot("A")), Rcpp::as<VT>(P.slot("b")));
 
-            InnerBall = HP.ComputeInnerBall();
-            if (InnerBall.second < 0.0) throw Rcpp::exception("Unable to compute a feasible point.");
-            if (!set_starting_point || (!set_mode && gaussian)) {
-                if (!set_starting_point) StartingPoint = InnerBall.first;
-                if (!set_mode && gaussian) mode = InnerBall.first;
+            if ((walk == shake_and_bake) || (walk == billiard_shake_bake))  {
+                 if (!set_starting_point){
+                    auto results = compute_boundary_point<Point>(HP, rng, static_cast<FT>(1e-4));
+                    VT boundary_point= results.first;
+                    facet_index=results.second;
+                    StartingPoint=boundary_point;
+                 }
             }
-            if (HP.is_in(StartingPoint) == 0) {
-                throw Rcpp::exception("The given point is not in the interior of the polytope!");
-            }
-            if (gaussian) {
-                StartingPoint = StartingPoint - mode;
-                HP.shift(mode.getCoefficients());
+            else{
+                InnerBall = HP.ComputeInnerBall();
+                if (InnerBall.second < 0.0) throw Rcpp::exception("Unable to compute a feasible point.");
+                if (!set_starting_point || (!set_mode && gaussian)) {
+                    if (!set_starting_point) StartingPoint = InnerBall.first;
+                    if (!set_mode && gaussian) mode = InnerBall.first;
+                }
+                if (HP.is_in(StartingPoint) == 0) {
+                    throw Rcpp::exception("The given point is not in the interior of the polytope!");
+                }
+                if (gaussian) {
+                    StartingPoint = StartingPoint - mode;
+                    HP.shift(mode.getCoefficients());
+                }
             }
             if (functor_defined) {
                 sample_from_polytope(HP, type, rng, randPoints, walkL, numpoints, gaussian, a, L, c,
-                    StartingPoint, nburns, set_L, walk, F, f, h, solver);
+                    StartingPoint, nburns, set_L, walk, F, f, h, solver,facet_index,nreflections);
             }
             else {
                 sample_from_polytope(HP, type, rng, randPoints, walkL, numpoints, gaussian, a, L, c,
-                    StartingPoint, nburns, set_L, walk, G, g, hess_g, solver);
+                    StartingPoint, nburns, set_L, walk, G, g, hess_g, solver,facet_index,nreflections);
             }
             break;
         }
