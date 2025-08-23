@@ -677,7 +677,8 @@ Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
 
             if ((walk == shake_and_bake) || (walk == billiard_shake_bake))  {
                  if (!set_starting_point){
-                    auto results = compute_boundary_point<Point>(HP, rng, static_cast<FT>(1e-4));
+                    FT tolerance = static_cast<FT>(1e-10);
+                    auto results = compute_boundary_point<Point>(HP, rng, tolerance);
                     VT boundary_point= results.first;
                     facet_index=results.second;
                     StartingPoint=boundary_point;
