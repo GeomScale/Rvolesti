@@ -13,7 +13,6 @@
 # Import required libraries
 library(ggplot2)
 library(volesti)
-library(hitandrun)
 
 # Generate 100D cube
 P = gen_cube(100, 'H')
