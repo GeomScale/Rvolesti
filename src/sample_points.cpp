@@ -257,8 +257,7 @@ bool is_walk(Rcpp::Nullable<Rcpp::List> random_walk, std::string str) {
 //' \item{\code{L}}{The maximum length of the billiard trajectory or the radius for the step of dikin, vaidya or john walk.}
 //' \item{\code{solver}}{Specify ODE solver for logconcave sampling. Options are i) leapfrog, ii) euler iii) runge-kutta iv) richardson}
 //' \item{\code{step_size}}{Optionally chosen step size for logconcave sampling. Defaults to a theoretical value if not provided.}
-//' \item{\code{facet_index}}{Optionally chosen a facet for the Starting Point (for SB and BSB)}
-//' \item{\code{nreflections}}{Optionally chosen a number of reflections in between Running Shake and Bake (just for BSB)}
+//' \item{\code{nreflections}}{Optionally chosen an upper bound for the number of reflections for the Billiard SB}
 //' @param distribution Optional. A list that declares the target density and some related parameters as follows:
 //' \describe{
 //' \item{\code{density}}{A string: (a) \code{'uniform'} for the uniform distribution or b) \code{'gaussian'} for the multidimensional spherical distribution c) \code{logconcave} with form proportional to exp(-f(x)) where f(x) is L-smooth and m-strongly-convex d) \code{'exponential'} for the exponential distribution. The default target distribution is the uniform distribution.}
@@ -544,7 +543,7 @@ Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
         } else if (logconcave) {
             walk = (type == 5) ? crhmc : nuts;
         } else if (gaussian) {
-            walk = (type == 1) ? cdhr : rdhr;
+            walk = (type == 1) ? cdhr : rdhr; 
         } else {
             walk = (type == 1) ? accelarated_billiard : billiard;
         }
