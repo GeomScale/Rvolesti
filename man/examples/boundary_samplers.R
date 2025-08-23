@@ -13,13 +13,21 @@
 # Import required libraries
 library(ggplot2)
 library(volesti)
+library(R.matlab)
 
-# Generate 100D cube
-P = gen_cube(100, 'H')
+# Generate EColi polytope 
+
+root <- rprojroot::find_root_file(criterion = rprojroot::has_file("DESCRIPTION"))
+metabolic_polytope_mat <- readMat(paste(root , '/man/examples/data/polytope_e_coli.mat', sep=""))
+A <- as.matrix(metabolic_polytope_mat$polytope[[1]])
+b <- as.matrix(metabolic_polytope_mat$polytope[[2]])
+center <- as.matrix(metabolic_polytope_mat$polytope[[3]])
+b_new <- b - A %*% center
+P <- Hpolytope(A = A, b = c(b_new))
 
 # Sampling time (Boundary Random Direction Hit and Run)
 start_time_brdhr <- Sys.time()
-points_brdhr= sample_points(P, n = 10000, random_walk = list("walk" = "BRDHR"))
+points_brdhr= sample_points(P, n = 100000, random_walk = list("walk" = "BRDHR", "nburns" = 10, "walk_length" = 1))
 end_time_brdhr <- Sys.time()
 
 # Calculate Effective Sample size (Boundary Random Direction Hit and Run)
@@ -35,7 +43,7 @@ time_per_ind_brdhr <- elapsed_time_brdhr / min_ess_brdhr
 #
 # Sampling time (Boundary Coordinate Direction Hit and Run)
 start_time_bcdhr <- Sys.time()
-points_bcdhr= sample_points(P, n = 10000, random_walk = list("walk" = "BCDHR"))
+points_bcdhr= sample_points(P, n = 100000, random_walk = list("walk" = "BCDHR", "nburns" = 10, "walk_length" = 1))
 end_time_bcdhr <- Sys.time()
 
 # Calculate Effective Sample size (Boundary Coordinate Direction Hit and Run)
@@ -52,7 +60,7 @@ time_per_ind_bcdhr <- elapsed_time_bcdhr / min_ess_bcdhr
 
 # Sampling time (Shake and Bake)
 start_time_sb <- Sys.time()
-points_sb = sample_points(P, n = 10000, random_walk = list("walk" = "SB"))
+points_sb = sample_points(P, n = 100000, random_walk = list("walk" = "SB", "nburns" = 10, "walk_length" = 1))
 end_time_sb <- Sys.time()
 
 # Calculate Effective Sample size (Shake and Bake)
@@ -69,7 +77,7 @@ time_per_ind_sb <- elapsed_time_sb / min_ess_sb
 
 # Sampling time (Billiard Shake and Bake)
 start_time_bsb <- Sys.time()
-points_bsb = sample_points(P, n = 10000, random_walk = list("walk" = "BSB"))
+points_bsb = sample_points(P, n = 100000, random_walk = list("walk" = "BSB", "nburns" = 10, "walk_length" = 1))
 end_time_bsb <- Sys.time()
 
 # Calculate Effective Sample size (Billiard Shake and Bake)
@@ -81,6 +89,7 @@ bsb_psrfs = psrf_univariate(points_bsb)
 max_psrf_bsb = max(bsb_psrfs)
 elapsed_time_bsb <- end_time_bsb - start_time_bsb
 time_per_ind_bsb <- elapsed_time_bsb / min_ess_bsb
+
 
 #Final results 
 
