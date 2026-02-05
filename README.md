@@ -68,8 +68,8 @@ More examples are available in `man/examples` directory.
 
 ## Credits
 
-Copyright (c) 2012-2024 Vissarion Fisikopoulos
+Copyright (c) 2012-2026 Vissarion Fisikopoulos
 
-Copyright (c) 2018-2024 Apostolos Chalkis
+Copyright (c) 2018-2026 Apostolos Chalkis
 
 You may redistribute or modify the software under the GNU Lesser General Public License as published by Free Software Foundation, either version 3 of the License, or (at your option) any later version. It is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY.
