@@ -8,9 +8,13 @@
 //(https://github.com/ConstrainedSampler/PolytopeSamplerMatlab/blob/master/code/solver/PackedCSparse/PackedChol.h) by Ioannis Iakovidis
 
 #pragma once
-#include <immintrin.h>
+#include <cmath>
 #include <random>
 #include <type_traits>
+
+#if defined(__AVX2__) && (defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86))
+#include <immintrin.h>
+#endif
 namespace PackedCSparse {
 	template <typename T, size_t k>
 	struct BaseImpl
