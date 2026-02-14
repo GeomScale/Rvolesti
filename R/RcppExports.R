@@ -417,6 +417,10 @@ volume <- function(P, settings = NULL, rounding = NULL) {
     .Call(`_volesti_volume`, P, settings, rounding)
 }
 
+volume_spectrahedra <- function(A_list, dim, verbosity) {
+    .Call(`_volesti_volume_spectrahedra`, A_list, dim, verbosity)
+}
+
 #' Write a SDPA format file
 #'
 #' Outputs a spectrahedron (the matrices defining a linear matrix inequality) and a vector (the objective function)
