@@ -209,9 +209,10 @@ std::pair<double, double> generic_volume(Polytope& P, RNGType &rng, unsigned int
 //' Z = gen_rand_zonotope(2, 4)
 //' pair_vol = volume(Z, settings = list("random_walk" = "RDHR", "walk_length" = 2))
 //'
-//' @export
+//' @keywords internal
+//' @noRd
 // [[Rcpp::export]]
-Rcpp::List volume (Rcpp::Reference P,
+Rcpp::List volume_internal (Rcpp::Reference P,
                    Rcpp::Nullable<Rcpp::List> settings = R_NilValue,
                    Rcpp::Nullable<std::string> rounding = R_NilValue) {
 

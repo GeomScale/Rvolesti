@@ -293,9 +293,10 @@ bool is_walk(Rcpp::Nullable<Rcpp::List> random_walk, std::string str) {
 //'
 //' # For sampling from logconcave densities see the examples directory
 //'
-//' @export
+//' @keywords internal
+//' @noRd
 // [[Rcpp::export]]
-Rcpp::NumericMatrix sample_points(Rcpp::Reference P,
+Rcpp::NumericMatrix sample_points_internal(Rcpp::Reference P,
                                   Rcpp::Nullable<unsigned int> n,
                                   Rcpp::Nullable<Rcpp::List> random_walk = R_NilValue,
                                   Rcpp::Nullable<Rcpp::List> distribution = R_NilValue,
