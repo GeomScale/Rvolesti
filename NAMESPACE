@@ -2,6 +2,7 @@
 
 export(compute_indicators)
 export(copula)
+export(count_linear_extensions)
 export(dinvweibull_with_loc)
 export(direct_sampling)
 export(ess)
