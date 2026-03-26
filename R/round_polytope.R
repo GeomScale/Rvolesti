@@ -5,7 +5,7 @@
 #' @param P A convex polytope. It is an object from class (a) Hpolytope or (b) Vpolytope or (c) Zonotope.
 #' @param settings Optional. A list of settings.
 #' \describe{
-#' \item{\code{method}}{The method to use for rounding, a) \code{'min_ellipsoid'} for the method based on mimimmum volume enclosing ellipsoid of a dataset, b) \code{'max_ellipsoid'} for the method based on maximum volume enclosed ellipsoid, (c) \code{'isotropy'} for the method based on svd decomposition. The default method is \code{'mee'} for all the representations.}
+#' \item{\code{method}}{The method to use for rounding, a) \code{'min_ellipsoid'} for the method based on minimum volume enclosing ellipsoid of a dataset, b) \code{'max_ellipsoid'} for the method based on maximum volume enclosed ellipsoid (H-polytopes only), c) \code{'isotropy'} for the method based on svd decomposition. The default method is \code{'isotropy'} for all the representations.}
 #' \item{\code{seed}}{Optional. A fixed seed for the number generator.}
 #' }
 #'
