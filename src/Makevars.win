@@ -1,5 +1,6 @@
 PKG_CPPFLAGS=-Iexternal -Iexternal/lpSolve/src -Iexternal/minimum_ellipsoid -Ivolesti/include -Ivolesti/include/convex_bodies/spectrahedra
-PKG_CXXFLAGS= -lm -ldl -DBOOST_NO_AUTO_PTR -DDISABLE_NLP_ORACLES
+# Use big object format on Windows to avoid assembler section limits in template-heavy files.
+PKG_CXXFLAGS= -lm -ldl -DBOOST_NO_AUTO_PTR -DDISABLE_NLP_ORACLES -Wa,-mbig-obj
 
 CXX_STD = CXX17
 
