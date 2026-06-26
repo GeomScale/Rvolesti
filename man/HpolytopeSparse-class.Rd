@@ -27,6 +27,9 @@ a \eqn{m}-dimensional vector b, s.t.: \eqn{Ax\leq b}, where \eqn{A} is sparse.
    \item{type}{A character with default value 'HpolytopeSparse', to declare the representation of the polytope.}
 }
 }
+\value{
+An object of class \code{HpolytopeSparse} representing the sparse H-polytope.
+}
 \examples{
 library(Matrix)
 bineq=c(10,10,10,10,10)

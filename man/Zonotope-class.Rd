@@ -17,6 +17,9 @@ A zonotope is a convex polytope defined by the Minkowski sum of \eqn{m} \eqn{d}-
    \item{type}{A character with default value 'Zonotope', to declare the representation of the polytope.}
 }
 }
+\value{
+An object of class \code{Zonotope} representing the zonotope.
+}
 \examples{
 G = matrix(c(2,3,-1,7,0,0),ncol = 2, nrow = 3, byrow = TRUE)
 P = Zonotope(G = G)

@@ -17,6 +17,9 @@ write_sdpa_format_file(spectrahedron, objective_function, output_file)
 Outputs a spectrahedron (the matrices defining a linear matrix inequality) and a vector (the objective function)
 to a SDPA format file.
 }
+\value{
+Invisibly returns the result of writing the SDPA format file.
+}
 \examples{
 \donttest{
 A0 = matrix(c(-1,0,0,0,-2,1,0,1,-2), nrow=3, ncol=3, byrow = TRUE)

@@ -42,12 +42,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          Rscript -e "install.packages(c('devtools', 'rcmdcheck', 'Rcpp', 'RcppEigen', 'BH', 'testthat', 'downloader', 'xfun'), dependencies = TRUE, repos = 'https://cloud.r-project.org')"
+          Rscript -e "install.packages(c('rcmdcheck', 'Rcpp', 'RcppEigen', 'BH', 'testthat'), dependencies = TRUE, repos = 'https://cloud.r-project.org')"
 
       - name: Check
         env:
           _R_CHECK_CRAN_INCOMING_REMOTE_: false
-        run: Rscript -e "library(rcmdcheck)" -e "rcmdcheck::rcmdcheck(args = c('--no-manual'), error_on = 'warning', check_dir = 'check')"
+        run: Rscript -e "library(rcmdcheck)" -e "rcmdcheck::rcmdcheck(args = c('--no-manual'), error_on = 'error', check_dir = 'check')"
 
       - name: Upload check results
         if: failure()

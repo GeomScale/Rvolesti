@@ -6,6 +6,7 @@
 
 //Contributed and/or modified by Alexandros Manochis, as part of Google Summer of Code 2020 program.
 //Contributed and/or modified by Vaibhav Thakkar, as part of Google Summer of Code 2021 program.
+//Contributed and/or modified by Korakitis Angelos, as part of Google Summer of Code 2025 program.
 
 // Licensed under GNU LGPL.3, see LICENCE file
 
@@ -38,9 +39,11 @@
 // Using MT as to deal with both dense and sparse matrices, MT_dense will be the type of result matrix
 template <typename MT_dense, typename MT, typename VT, typename NT>
 std::tuple<MT_dense, VT, bool> max_inscribed_ellipsoid(MT A, VT b, VT const& x0,
-                                                       unsigned int const& maxiter,
-                                                       NT const& tol, NT const& reg)
+                                                       JohnEllipsoidParams<NT> const& params)
 {
+    unsigned int maxiter = params.maxiter;
+    NT tol = params.tol, reg = params.reg;
+
     typedef Eigen::DiagonalMatrix<NT, Eigen::Dynamic> Diagonal_MT;
     //typedef matrix_computational_operator<MT> mat_op;
 
@@ -129,8 +132,8 @@ std::tuple<MT_dense, VT, bool> max_inscribed_ellipsoid(MT A, VT b, VT const& x0,
             auto op = get_mat_prod_op<NT>(E2);
             auto eigs = get_eigs_solver<NT>(op, n);
             eigs->init();
-            int nconv = eigs->compute();
-            if (eigs->info() == Spectra::COMPUTATION_INFO::SUCCESSFUL) {
+            int nconv = eigs->compute(Spectra::SortRule::BothEnds);
+            if (eigs->info() == Spectra::CompInfo::Successful) {
                 Rel = 1.0 / eigs->eigenvalues().coeff(1);
                 rel = 1.0 / eigs->eigenvalues().coeff(0);
             } else {

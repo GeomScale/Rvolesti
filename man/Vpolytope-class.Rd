@@ -17,6 +17,9 @@ A V-polytope is a convex polytope defined by the set of its vertices.
    \item{type}{A character with default value 'Vpolytope', to declare the representation of the polytope.}
 }
 }
+\value{
+An object of class \code{Vpolytope} representing the V-polytope.
+}
 \examples{
 V = matrix(c(2,3,-1,7,0,0),ncol = 2, nrow = 3, byrow = TRUE)
 P = Vpolytope(V = V)

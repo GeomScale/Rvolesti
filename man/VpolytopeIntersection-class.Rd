@@ -19,6 +19,9 @@ An intersection of two V-polytopes is defined by the intersection of the two cor
    \item{type}{A character with default value 'VpolytopeIntersection', to declare the representation of the polytope.}
 }
 }
+\value{
+An object of class \code{VpolytopeIntersection} representing the intersection of two V-polytopes.
+}
 \examples{
 P1 = gen_simplex(2,'V')
 P2 = gen_cross(2,'V')
