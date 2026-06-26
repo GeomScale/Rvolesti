@@ -5,7 +5,7 @@ QD_SOURCES= bits.cc c_dd.cc c_qd.cc dd_const.cc dd_real.cc fpu.cc \
 
 QD_OBJECTS=$(QD_SOURCES:.cc=.o)
 
-libqd.a: $(QD_OBJECTS)
+libqd.a: clean $(QD_OBJECTS)
 	$(AR) rc libqd.a $(QD_OBJECTS)
 
 .cc.o:
@@ -13,3 +13,4 @@ libqd.a: $(QD_OBJECTS)
 
 clean:
 	rm -rf $(QD_OBJECTS) libqd.a
+
