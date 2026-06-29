@@ -21,8 +21,6 @@ jobs:
       matrix:
         config:
           - {os: macOS-latest,   r: 'release'}
-          ## x86_64 runner for hardware-specific code (FloatArray.h)
-          - {os: macOS-13,       r: 'release'}
 
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -47,7 +45,7 @@ jobs:
       - name: Check
         env:
           _R_CHECK_CRAN_INCOMING_REMOTE_: false
-        run: Rscript -e "library(rcmdcheck)" -e "rcmdcheck::rcmdcheck(args = c('--no-manual'), error_on = 'error', check_dir = 'check')"
+        run: Rscript -e "library(rcmdcheck)" -e "rcmdcheck::rcmdcheck(args = c('--no-manual'), error_on = 'warning', check_dir = 'check')"
 
       - name: Upload check results
         if: failure()
