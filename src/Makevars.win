@@ -10,7 +10,7 @@ $(SHLIB): external/lpSolve/src/liblp_solve.a external/PackedCSparse/qd/libqd.a
 external/lpSolve/src/liblp_solve.a:
 	@(cd external/lpSolve/src && $(MAKE) liblp_solve.a \
     CC="$(CC)" CPPFLAGS="$(CPPFLAGS) -DUSRDLL -DINLINE=static" \
-    CFLAGS="$(CFLAGS)" CPICFLAGS="$(CPICFLAGS)" AR="$(AR)" \
+    CFLAGS="$(CFLAGS) -Wno-alloc-size-larger-than" CPICFLAGS="$(CPICFLAGS)" AR="$(AR)" \
     RANLIB="$(RANLIB)")
 
 external/PackedCSparse/qd/libqd.a:
