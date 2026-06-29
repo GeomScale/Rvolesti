@@ -369,6 +369,7 @@ sample_points <- function(P, n, random_walk = NULL, distribution = NULL, seed = 
 #' @param validate Optional. Whether to validate the sampled matrices. Default is false.
 #'
 #' @return A list of sampled correlation matrices.
+#' @export
 uniform_sample_correlation_matrices <- function(n, num_matrices = 1000L, walk_length = 1L, nburns = 0L, validate = FALSE) {
     .Call(`_volesti_uniform_sample_correlation_matrices`, n, num_matrices, walk_length, nburns, validate)
 }
@@ -426,6 +427,7 @@ volume <- function(P, settings = NULL, rounding = NULL) {
 #' @param objective_function A numerical vector of length n
 #' @param output_file Name of the output file
 #'
+#' @return Invisibly returns the result of writing the SDPA format file.
 #' @examples
 #' \donttest{
 #' A0 = matrix(c(-1,0,0,0,-2,1,0,1,-2), nrow=3, ncol=3, byrow = TRUE)

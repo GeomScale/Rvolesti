@@ -19,6 +19,9 @@ An H-polytope is a convex polytope defined by a set of linear inequalities or eq
    \item{type}{A character with default value 'Hpolytope', to declare the representation of the polytope.}
 }
 }
+\value{
+An object of class \code{Hpolytope} representing the H-polytope.
+}
 \examples{
 A = matrix(c(-1,0,0,-1,1,1), ncol=2, nrow=3, byrow=TRUE)
 b = c(0,0,1)

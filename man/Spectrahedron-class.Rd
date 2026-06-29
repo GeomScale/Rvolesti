@@ -14,6 +14,9 @@ The matrices \eqn{A_i} are symmetric \eqn{m \times m} real matrices and \eqn{\pr
    \item{matrices}{A List that contains the matrices \eqn{A_0, A_1, ..., A_n}.}
 }
 }
+\value{
+An object of class \code{Spectrahedron} representing the spectrahedron.
+}
 \examples{
 A0 = matrix(c(-1,0,0,0,-2,1,0,1,-2), nrow=3, ncol=3, byrow = TRUE)
 A1 = matrix(c(-1,0,0,0,0,1,0,1,0), nrow=3, ncol=3, byrow = TRUE)
