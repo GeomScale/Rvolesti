@@ -26,7 +26,7 @@ Hpolytope <- setClass (
   
   # Defining slot type
   representation (
-    A = "matrix",
+    A = "ANY",
     b = "numeric",
     volume = "numeric",
     type = "character"
