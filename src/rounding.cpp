@@ -101,7 +101,7 @@ Rcpp::List rounding (Rcpp::Reference P,
     if(method.isNotNull()) {
         method_rcpp =  Rcpp::as<std::string>(method);
         if (method_rcpp.compare(std::string("max_ellipsoid")) == 0 && type != 1) {
-            Rcpp::exception("This method can not be used for V- or Z-polytopes!");
+            throw Rcpp::exception("This method can not be used for V- or Z-polytopes!");
         }
     }
 
