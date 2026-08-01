@@ -355,9 +355,10 @@ rounding <- function(P, method = NULL, seed = NULL) {
 #'
 #' # For sampling from logconcave densities see the examples directory
 #'
-#' @export
-sample_points <- function(P, n, random_walk = NULL, distribution = NULL, seed = NULL) {
-    .Call(`_volesti_sample_points`, P, n, random_walk, distribution, seed)
+#' @keywords internal
+#' @noRd
+sample_points_internal <- function(P, n, random_walk = NULL, distribution = NULL, seed = NULL) {
+    .Call(`_volesti_sample_points_internal`, P, n, random_walk, distribution, seed)
 }
 
 #' Uniformly sample correlation matrices
@@ -413,9 +414,14 @@ uniform_sample_correlation_matrices <- function(n, num_matrices = 1000L, walk_le
 #' Z = gen_rand_zonotope(2, 4)
 #' pair_vol = volume(Z, settings = list("random_walk" = "RDHR", "walk_length" = 2))
 #'
-#' @export
-volume <- function(P, settings = NULL, rounding = NULL) {
-    .Call(`_volesti_volume`, P, settings, rounding)
+#' @keywords internal
+#' @noRd
+volume_internal <- function(P, settings = NULL, rounding = NULL) {
+    .Call(`_volesti_volume_internal`, P, settings, rounding)
+}
+
+volume_spectrahedra <- function(A_list, dim, verbosity) {
+    .Call(`_volesti_volume_spectrahedra`, A_list, dim, verbosity)
 }
 
 #' Write a SDPA format file

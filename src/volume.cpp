@@ -10,6 +10,8 @@
 
 #include <Rcpp.h>
 #include <RcppEigen.h>
+#include <vector>
+#include <sstream>
 #include <boost/random.hpp>
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/normal_distribution.hpp>
@@ -207,9 +209,10 @@ std::pair<double, double> generic_volume(Polytope& P, RNGType &rng, unsigned int
 //' Z = gen_rand_zonotope(2, 4)
 //' pair_vol = volume(Z, settings = list("random_walk" = "RDHR", "walk_length" = 2))
 //'
-//' @export
+//' @keywords internal
+//' @noRd
 // [[Rcpp::export]]
-Rcpp::List volume (Rcpp::Reference P,
+Rcpp::List volume_internal (Rcpp::Reference P,
                    Rcpp::Nullable<Rcpp::List> settings = R_NilValue,
                    Rcpp::Nullable<std::string> rounding = R_NilValue) {
 
@@ -422,4 +425,19 @@ Rcpp::List volume (Rcpp::Reference P,
     }
 
     return Rcpp::List::create(Rcpp::Named("log_volume") = pair_vol.first, Rcpp::Named("volume") = pair_vol.second);
+}
+
+// [[Rcpp::export]]
+SEXP volume_spectrahedra(Rcpp::List A_list, int dim, int verbosity) {
+    const int verb_level = verbosity;
+    const R_xlen_t list_size = A_list.size();
+    if (verb_level < 0 || verb_level > 2) {
+        Rcpp::stop("verbosity must be between 0 and 2");
+    }
+
+    std::ostringstream oss;
+    oss << "Volume for Spectrahedron (dimension " << dim
+        << ", matrices " << static_cast<long>(list_size)
+        << ") is not implemented yet in Rvolesti; this function currently exposes only the interface.";
+    Rcpp::stop(oss.str());
 }

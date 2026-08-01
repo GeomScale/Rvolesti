@@ -189,9 +189,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// sample_points
-Rcpp::NumericMatrix sample_points(Rcpp::Reference P, Rcpp::Nullable<unsigned int> n, Rcpp::Nullable<Rcpp::List> random_walk, Rcpp::Nullable<Rcpp::List> distribution, Rcpp::Nullable<double> seed);
-RcppExport SEXP _volesti_sample_points(SEXP PSEXP, SEXP nSEXP, SEXP random_walkSEXP, SEXP distributionSEXP, SEXP seedSEXP) {
+// sample_points_internal
+Rcpp::NumericMatrix sample_points_internal(Rcpp::Reference P, Rcpp::Nullable<unsigned int> n, Rcpp::Nullable<Rcpp::List> random_walk, Rcpp::Nullable<Rcpp::List> distribution, Rcpp::Nullable<double> seed);
+RcppExport SEXP _volesti_sample_points_internal(SEXP PSEXP, SEXP nSEXP, SEXP random_walkSEXP, SEXP distributionSEXP, SEXP seedSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -200,7 +200,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::List> >::type random_walk(random_walkSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::List> >::type distribution(distributionSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<double> >::type seed(seedSEXP);
-    rcpp_result_gen = Rcpp::wrap(sample_points(P, n, random_walk, distribution, seed));
+    rcpp_result_gen = Rcpp::wrap(sample_points_internal(P, n, random_walk, distribution, seed));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -219,16 +219,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// volume
-Rcpp::List volume(Rcpp::Reference P, Rcpp::Nullable<Rcpp::List> settings, Rcpp::Nullable<std::string> rounding);
-RcppExport SEXP _volesti_volume(SEXP PSEXP, SEXP settingsSEXP, SEXP roundingSEXP) {
+// volume_internal
+Rcpp::List volume_internal(Rcpp::Reference P, Rcpp::Nullable<Rcpp::List> settings, Rcpp::Nullable<std::string> rounding);
+RcppExport SEXP _volesti_volume_internal(SEXP PSEXP, SEXP settingsSEXP, SEXP roundingSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::Reference >::type P(PSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::List> >::type settings(settingsSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<std::string> >::type rounding(roundingSEXP);
-    rcpp_result_gen = Rcpp::wrap(volume(P, settings, rounding));
+    rcpp_result_gen = Rcpp::wrap(volume_internal(P, settings, rounding));
+    return rcpp_result_gen;
+END_RCPP
+}
+// volume_spectrahedra
+SEXP volume_spectrahedra(Rcpp::List A_list, int dim, int verbosity);
+RcppExport SEXP _volesti_volume_spectrahedra(SEXP A_listSEXP, SEXP dimSEXP, SEXP verbositySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List >::type A_list(A_listSEXP);
+    Rcpp::traits::input_parameter< int >::type dim(dimSEXP);
+    Rcpp::traits::input_parameter< int >::type verbosity(verbositySEXP);
+    rcpp_result_gen = Rcpp::wrap(volume_spectrahedra(A_list, dim, verbosity));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -274,9 +287,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_volesti_raftery", (DL_FUNC) &_volesti_raftery, 4},
     {"_volesti_rotating", (DL_FUNC) &_volesti_rotating, 3},
     {"_volesti_rounding", (DL_FUNC) &_volesti_rounding, 3},
-    {"_volesti_sample_points", (DL_FUNC) &_volesti_sample_points, 5},
+    {"_volesti_sample_points_internal", (DL_FUNC) &_volesti_sample_points_internal, 5},
     {"_volesti_uniform_sample_correlation_matrices", (DL_FUNC) &_volesti_uniform_sample_correlation_matrices, 5},
-    {"_volesti_volume", (DL_FUNC) &_volesti_volume, 3},
+    {"_volesti_volume_internal", (DL_FUNC) &_volesti_volume_internal, 3},
+    {"_volesti_volume_spectrahedra", (DL_FUNC) &_volesti_volume_spectrahedra, 3},
     {"_volesti_write_sdpa_format_file", (DL_FUNC) &_volesti_write_sdpa_format_file, 3},
     {"_volesti_zono_approx", (DL_FUNC) &_volesti_zono_approx, 4},
     {NULL, NULL, 0}
