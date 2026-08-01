@@ -9,9 +9,9 @@
 #'
 #'    \item{bineq}{An \eqn{m}-dimensional vector for the ineqaulities.}
 #'
-#'    \item{Aineq}{An \eqn{m'\times d} sparse numerical matrix for the equalities.}
+#'    \item{Aeq}{An m'×d sparse numerical matrix for the equalities.}
 #'
-#'    \item{bineq}{An \eqn{m'}-dimensional vector for the eqaulities.}
+#'    \item{beq}{An m'-dimensional vector for the equalities.}
 #'
 #'    \item{lb}{\eqn{d}-dimensional vector lb.}
 #'
@@ -20,6 +20,7 @@
 #'    \item{type}{A character with default value 'HpolytopeSparse', to declare the representation of the polytope.}
 #' }
 #'
+#' @import Matrix
 #' @examples
 #' library(Matrix)
 #' bineq=c(10,10,10,10,10)
