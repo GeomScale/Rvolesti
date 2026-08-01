@@ -7,6 +7,17 @@
 sample_points(P, n, random_walk = NULL, distribution = NULL, seed = NULL)
 }
 \arguments{
+
+\item{use_autodiff}{Logical. If TRUE, the grad_function parameter should be
+  the negative log-probability function (function value only). Automatic
+  differentiation will compute derivatives. If FALSE (default), grad_function
+  should be the negative gradient (-∇f(x)). Default: FALSE.}
+
+\item{grad_function}{Function. The function to use for sampling.
+  When use_autodiff=TRUE: should compute f(x) (function value)
+  When use_autodiff=FALSE: should compute -∇f(x) (negative gradient)
+  Required parameter.}
+  
 \item{P}{A convex polytope. It is an object from class (a) Hpolytope or (b) Vpolytope or (c) Zonotope or (d) VpolytopeIntersection.}
 
 \item{n}{The number of points that the function is going to sample from the convex polytope.}
@@ -69,6 +80,24 @@ P = gen_rand_hpoly(2,20)
 points = sample_points(P, n = 100, random_walk = list("walk" = "BRDHR"))
 
 # For sampling from logconcave densities see the examples directory
+
+# Example 1: Traditional approach (manually provided gradient)
+log_prob <- function(x) sum(x^2) / 2
+neg_grad <- function(x) -x
+
+P <- gen_cube(d = 5)
+samples1 <- sample_points(P, 
+                         WalkType = "CDHR",
+                         N = 1000,
+                         use_autodiff = FALSE,
+                         grad_function = neg_grad)
+
+# Example 2: New autodiff approach (automatic gradient)
+samples2 <- sample_points(P,
+                         WalkType = "CDHR", 
+                         N = 1000,
+                         use_autodiff = TRUE,
+                         grad_function = log_prob)
 
 }
 \references{
