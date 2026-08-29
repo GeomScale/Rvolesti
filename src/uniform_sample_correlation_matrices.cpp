@@ -21,6 +21,7 @@
 //' @param validate Optional. Whether to validate the sampled matrices. Default is false.
 //'
 //' @return A list of sampled correlation matrices.
+//' @export
 // [[Rcpp::export]]
 Rcpp::List uniform_sample_correlation_matrices(const unsigned int n, const unsigned int num_matrices = 1000,
                                                const unsigned int walk_length=1, const unsigned int nburns = 0,  const bool validate = false) {

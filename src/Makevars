@@ -1,9 +1,9 @@
 PKG_CPPFLAGS=-Iexternal -Iexternal/lpSolve/src -Iexternal/minimum_ellipsoid -Iexternal/Spectra/include -Ivolesti/include -Ivolesti/include/convex_bodies/spectrahedra
-PKG_CXXFLAGS= -DBOOST_NO_AUTO_PTR -DDISABLE_NLP_ORACLES
+PKG_CXXFLAGS= -DBOOST_NO_AUTO_PTR -DDISABLE_NLP_ORACLES -pthread
 
 CXX_STD = CXX17
 
-PKG_LIBS=-Lexternal/lpSolve/src -llp_solve -Lexternal/PackedCSparse/qd -lqd $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+PKG_LIBS=-Lexternal/lpSolve/src -llp_solve -Lexternal/PackedCSparse/qd -lqd $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) -pthread
 
 $(SHLIB): external/lpSolve/src/liblp_solve.a external/PackedCSparse/qd/libqd.a
 

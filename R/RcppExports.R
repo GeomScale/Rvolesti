@@ -360,6 +360,132 @@ sample_points <- function(P, n, random_walk = NULL, distribution = NULL, seed = 
     .Call(`_volesti_sample_points`, P, n, random_walk, distribution, seed)
 }
 
+#' Sample one connected simplex-sphere component until convergence
+#'
+#' This is the native convergence-controlled sampler used internally by
+#' `sample_simplex_ball()`.
+#'
+#' @param A,b Finite simplex half-space representation `A * x <= b`.
+#' @param V Simplex vertices stored column-wise.
+#' @param start,center Starting point and unit-sphere centre.
+#' @param n_chains Number of independent chains; at least two.
+#' @param check_interval Retained draws per chain between diagnostic checks.
+#' @param max_iterations Maximum retained draws per chain.
+#' @param walk_length Number of transitions between retained draws.
+#' @param burnin Number of discarded transitions per chain.
+#' @param psrf_target,ess_target Convergence thresholds.
+#' @param walk Either `"GCW"` or `"ReGCW"`.
+#' @param regcw_tau Reflective-walk trajectory scale.
+#' @param max_reflections Reflective-walk cap; zero selects the native default.
+#' @param seed Optional non-negative RNG seed.
+#' @return A list containing retained samples, separate chains, PSRF and ESS
+#'   diagnostics, diagnostic history, convergence status, and any cap warning.
+#'
+#' @keywords internal
+cpp_sample_simplex_ball_component <- function(A, b, V, start, center, n_chains, check_interval, max_iterations, walk_length, burnin, psrf_target, ess_target, walk, regcw_tau, max_reflections, seed = NULL) {
+    .Call(`_volesti_cpp_sample_simplex_ball_component`, A, b, V, start, center, n_chains, check_interval, max_iterations, walk_length, burnin, psrf_target, ess_target, walk, regcw_tau, max_reflections, seed)
+}
+
+#' Sample every active simplex-sphere component in parallel
+#'
+#' This is the native multicomponent sampler used by the high-level
+#' `sample_simplex_ball()` pipeline. Each active component receives its own
+#' RNG stream and convergence-controlled set of chains. Components are run
+#' concurrently; PSRF and ESS are still evaluated only among chains targeting
+#' the same connected component.
+#'
+#' @param A,b Finite simplex half-space representation `A * x <= b`.
+#' @param V Simplex vertices stored column-wise.
+#' @param starting_points Matrix with one feasible starting point per column.
+#' @param component_weights Non-negative component surface-area weights.
+#' @param N Exact total number of samples to return. The native wrapper uses
+#'   deterministic largest-remainder allocation across components.
+#' @param center Centre of the unit sphere.
+#' @param n_chains Number of independent diagnostic chains per component.
+#' @param check_interval Base retained draws per chain between diagnostic
+#'   checks. It is increased when necessary to provide each component pool.
+#' @param max_iterations Maximum retained draws per chain.
+#' @param walk_length Number of transitions between retained draws.
+#' @param burnin Number of discarded transitions per chain.
+#' @param psrf_target,ess_target Convergence thresholds.
+#' @param walk Either `"GCW"` or `"ReGCW"`.
+#' @param regcw_tau Reflective-walk trajectory scale.
+#' @param max_reflections Reflective-walk cap; zero selects the native default.
+#' @param seed Optional non-negative master RNG seed.
+#' @return A list containing the exact combined sample matrix, one-based
+#'   sample-component labels, normalized weights and counts, per-component
+#'   convergence results, aggregate PSRF/ESS, convergence status and warnings.
+#'
+#' @keywords internal
+cpp_sample_simplex_ball <- function(A, b, V, starting_points, component_weights, center, N, n_chains, check_interval, max_iterations, walk_length, burnin, psrf_target, ess_target, walk, regcw_tau, max_reflections, seed = NULL) {
+    .Call(`_volesti_cpp_sample_simplex_ball`, A, b, V, starting_points, component_weights, center, N, n_chains, check_interval, max_iterations, walk_length, burnin, psrf_target, ess_target, walk, regcw_tau, max_reflections, seed)
+}
+
+#' Find connected components of a simplex-sphere intersection
+#'
+#' This is an internal helper for `sample_simplex_ball()`. Vertex indices in
+#' the returned components are one-based, as expected by R.
+#'
+#' @param vertices Simplex vertices stored column-wise.
+#' @param center Centre of the ball.
+#' @param radius Positive ball radius.
+#' @param tol Positive numerical tolerance.
+#' @return A list containing the one-based components, active-vertex mask,
+#'   active vertex indices, and 1-skeleton adjacency matrix.
+#'
+#' @keywords internal
+cpp_simplex_ball_components <- function(vertices, center, radius = 1.0, tol = 1e-10) {
+    .Call(`_volesti_cpp_simplex_ball_components`, vertices, center, radius, tol)
+}
+
+#' Find a starting point for one simplex-sphere component
+#'
+#' This is an internal helper for `sample_simplex_ball()`. `component` uses
+#' one-based R vertex indices; the native component routine uses zero-based
+#' indices internally.
+#'
+#' @param vertices Simplex vertices stored column-wise.
+#' @param component One-based vertex indices for one connected component.
+#' @param A,b Finite simplex half-space representation `A * x <= b`.
+#' @param center Centre of the ball.
+#' @param interior_point Optional strict interior point. When omitted, a
+#'   Chebyshev-centre approximation is computed natively.
+#' @param radius Positive ball radius.
+#' @param tol Positive numerical tolerance.
+#' @return A feasible point on the requested spherical component.
+#'
+#' @keywords internal
+cpp_simplex_ball_start <- function(vertices, component, A, b, center, interior_point = NULL, radius = 1.0, tol = 1e-10) {
+    .Call(`_volesti_cpp_simplex_ball_start`, vertices, component, A, b, center, interior_point, radius, tol)
+}
+
+#' Estimate relative simplex-sphere component surface areas
+#'
+#' This is an internal helper for `sample_simplex_ball()`. It uses uniform
+#' directions on the complete sphere, keeps directions satisfying the
+#' simplex inequalities, and classifies accepted points by the component of
+#' the simplex 1-skeleton visible without entering the open unit ball. The
+#' nearest validated starting point resolves only numerical or tangential
+#' ambiguities.
+#'
+#' @param A,b Finite simplex half-space representation `A * x <= b`.
+#' @param vertices Simplex vertices stored column-wise.
+#' @param components List of one-based vertex-index components.
+#' @param starting_points Matrix with one validated start per component.
+#' @param center Centre of the unit sphere.
+#' @param accepted_draws Requested number of feasible sphere draws.
+#' @param max_attempts Maximum number of full-sphere proposals.
+#' @param seed Optional non-negative RNG seed.
+#' @param tolerance Positive numerical tolerance.
+#' @return A list containing normalized component weights, Monte Carlo
+#'   standard errors and counts, proposal metadata, ambiguous-assignment
+#'   count, and any attempt-cap warning.
+#'
+#' @keywords internal
+cpp_simplex_ball_component_weights <- function(A, b, vertices, components, starting_points, center, accepted_draws, max_attempts, seed = NULL, tolerance = 1e-10) {
+    .Call(`_volesti_cpp_simplex_ball_component_weights`, A, b, vertices, components, starting_points, center, accepted_draws, max_attempts, seed, tolerance)
+}
+
 #' Uniformly sample correlation matrices
 #'
 #' @param n The dimension of the correlation matrix.

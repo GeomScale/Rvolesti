@@ -204,6 +204,112 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_sample_simplex_ball_component
+Rcpp::List cpp_sample_simplex_ball_component(Rcpp::NumericMatrix A, Rcpp::NumericVector b, Rcpp::NumericMatrix V, Rcpp::NumericVector start, Rcpp::NumericVector center, unsigned int n_chains, unsigned int check_interval, unsigned int max_iterations, unsigned int walk_length, unsigned int burnin, double psrf_target, double ess_target, std::string walk, double regcw_tau, unsigned int max_reflections, Rcpp::Nullable<double> seed);
+RcppExport SEXP _volesti_cpp_sample_simplex_ball_component(SEXP ASEXP, SEXP bSEXP, SEXP VSEXP, SEXP startSEXP, SEXP centerSEXP, SEXP n_chainsSEXP, SEXP check_intervalSEXP, SEXP max_iterationsSEXP, SEXP walk_lengthSEXP, SEXP burninSEXP, SEXP psrf_targetSEXP, SEXP ess_targetSEXP, SEXP walkSEXP, SEXP regcw_tauSEXP, SEXP max_reflectionsSEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type A(ASEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type b(bSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type V(VSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type start(startSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type center(centerSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type n_chains(n_chainsSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type check_interval(check_intervalSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type max_iterations(max_iterationsSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type walk_length(walk_lengthSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type burnin(burninSEXP);
+    Rcpp::traits::input_parameter< double >::type psrf_target(psrf_targetSEXP);
+    Rcpp::traits::input_parameter< double >::type ess_target(ess_targetSEXP);
+    Rcpp::traits::input_parameter< std::string >::type walk(walkSEXP);
+    Rcpp::traits::input_parameter< double >::type regcw_tau(regcw_tauSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type max_reflections(max_reflectionsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<double> >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_sample_simplex_ball_component(A, b, V, start, center, n_chains, check_interval, max_iterations, walk_length, burnin, psrf_target, ess_target, walk, regcw_tau, max_reflections, seed));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_sample_simplex_ball
+Rcpp::List cpp_sample_simplex_ball(Rcpp::NumericMatrix A, Rcpp::NumericVector b, Rcpp::NumericMatrix V, Rcpp::NumericMatrix starting_points, Rcpp::NumericVector component_weights, Rcpp::NumericVector center, unsigned int N, unsigned int n_chains, unsigned int check_interval, unsigned int max_iterations, unsigned int walk_length, unsigned int burnin, double psrf_target, double ess_target, std::string walk, double regcw_tau, unsigned int max_reflections, Rcpp::Nullable<double> seed);
+RcppExport SEXP _volesti_cpp_sample_simplex_ball(SEXP ASEXP, SEXP bSEXP, SEXP VSEXP, SEXP starting_pointsSEXP, SEXP component_weightsSEXP, SEXP centerSEXP, SEXP NSEXP, SEXP n_chainsSEXP, SEXP check_intervalSEXP, SEXP max_iterationsSEXP, SEXP walk_lengthSEXP, SEXP burninSEXP, SEXP psrf_targetSEXP, SEXP ess_targetSEXP, SEXP walkSEXP, SEXP regcw_tauSEXP, SEXP max_reflectionsSEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type A(ASEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type b(bSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type V(VSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type starting_points(starting_pointsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type component_weights(component_weightsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type center(centerSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type n_chains(n_chainsSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type check_interval(check_intervalSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type max_iterations(max_iterationsSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type walk_length(walk_lengthSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type burnin(burninSEXP);
+    Rcpp::traits::input_parameter< double >::type psrf_target(psrf_targetSEXP);
+    Rcpp::traits::input_parameter< double >::type ess_target(ess_targetSEXP);
+    Rcpp::traits::input_parameter< std::string >::type walk(walkSEXP);
+    Rcpp::traits::input_parameter< double >::type regcw_tau(regcw_tauSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type max_reflections(max_reflectionsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<double> >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_sample_simplex_ball(A, b, V, starting_points, component_weights, center, N, n_chains, check_interval, max_iterations, walk_length, burnin, psrf_target, ess_target, walk, regcw_tau, max_reflections, seed));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_simplex_ball_components
+Rcpp::List cpp_simplex_ball_components(Rcpp::NumericMatrix vertices, Rcpp::NumericVector center, double radius, double tol);
+RcppExport SEXP _volesti_cpp_simplex_ball_components(SEXP verticesSEXP, SEXP centerSEXP, SEXP radiusSEXP, SEXP tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type vertices(verticesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type center(centerSEXP);
+    Rcpp::traits::input_parameter< double >::type radius(radiusSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_simplex_ball_components(vertices, center, radius, tol));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_simplex_ball_start
+Rcpp::NumericVector cpp_simplex_ball_start(Rcpp::NumericMatrix vertices, Rcpp::IntegerVector component, Rcpp::NumericMatrix A, Rcpp::NumericVector b, Rcpp::NumericVector center, Rcpp::Nullable<Rcpp::NumericVector> interior_point, double radius, double tol);
+RcppExport SEXP _volesti_cpp_simplex_ball_start(SEXP verticesSEXP, SEXP componentSEXP, SEXP ASEXP, SEXP bSEXP, SEXP centerSEXP, SEXP interior_pointSEXP, SEXP radiusSEXP, SEXP tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type vertices(verticesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type component(componentSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type A(ASEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type b(bSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type center(centerSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type interior_point(interior_pointSEXP);
+    Rcpp::traits::input_parameter< double >::type radius(radiusSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_simplex_ball_start(vertices, component, A, b, center, interior_point, radius, tol));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_simplex_ball_component_weights
+Rcpp::List cpp_simplex_ball_component_weights(Rcpp::NumericMatrix A, Rcpp::NumericVector b, Rcpp::NumericMatrix vertices, Rcpp::List components, Rcpp::NumericMatrix starting_points, Rcpp::NumericVector center, unsigned int accepted_draws, unsigned int max_attempts, Rcpp::Nullable<double> seed, double tolerance);
+RcppExport SEXP _volesti_cpp_simplex_ball_component_weights(SEXP ASEXP, SEXP bSEXP, SEXP verticesSEXP, SEXP componentsSEXP, SEXP starting_pointsSEXP, SEXP centerSEXP, SEXP accepted_drawsSEXP, SEXP max_attemptsSEXP, SEXP seedSEXP, SEXP toleranceSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type A(ASEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type b(bSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type vertices(verticesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type components(componentsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type starting_points(starting_pointsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type center(centerSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type accepted_draws(accepted_drawsSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type max_attempts(max_attemptsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<double> >::type seed(seedSEXP);
+    Rcpp::traits::input_parameter< double >::type tolerance(toleranceSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_simplex_ball_component_weights(A, b, vertices, components, starting_points, center, accepted_draws, max_attempts, seed, tolerance));
+    return rcpp_result_gen;
+END_RCPP
+}
 // uniform_sample_correlation_matrices
 Rcpp::List uniform_sample_correlation_matrices(const unsigned int n, const unsigned int num_matrices, const unsigned int walk_length, const unsigned int nburns, const bool validate);
 RcppExport SEXP _volesti_uniform_sample_correlation_matrices(SEXP nSEXP, SEXP num_matricesSEXP, SEXP walk_lengthSEXP, SEXP nburnsSEXP, SEXP validateSEXP) {
@@ -275,6 +381,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_volesti_rotating", (DL_FUNC) &_volesti_rotating, 3},
     {"_volesti_rounding", (DL_FUNC) &_volesti_rounding, 3},
     {"_volesti_sample_points", (DL_FUNC) &_volesti_sample_points, 5},
+    {"_volesti_cpp_sample_simplex_ball_component", (DL_FUNC) &_volesti_cpp_sample_simplex_ball_component, 16},
+    {"_volesti_cpp_sample_simplex_ball", (DL_FUNC) &_volesti_cpp_sample_simplex_ball, 18},
+    {"_volesti_cpp_simplex_ball_components", (DL_FUNC) &_volesti_cpp_simplex_ball_components, 4},
+    {"_volesti_cpp_simplex_ball_start", (DL_FUNC) &_volesti_cpp_simplex_ball_start, 8},
+    {"_volesti_cpp_simplex_ball_component_weights", (DL_FUNC) &_volesti_cpp_simplex_ball_component_weights, 10},
     {"_volesti_uniform_sample_correlation_matrices", (DL_FUNC) &_volesti_uniform_sample_correlation_matrices, 5},
     {"_volesti_volume", (DL_FUNC) &_volesti_volume, 3},
     {"_volesti_write_sdpa_format_file", (DL_FUNC) &_volesti_write_sdpa_format_file, 3},

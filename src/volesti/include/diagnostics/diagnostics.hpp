@@ -18,6 +18,7 @@
 #include "diagnostics/geweke.hpp"
 #include "diagnostics/raftery.hpp"
 #include "diagnostics/effective_sample_size.hpp"
+#include "diagnostics/multichain_diagnostics.hpp"
 #include "diagnostics/thin_samples.hpp"
 #include "diagnostics/print_diagnostics.hpp"
 

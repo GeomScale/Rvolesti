@@ -28,6 +28,7 @@
 //' @param objective_function A numerical vector of length n
 //' @param output_file Name of the output file
 //'
+//' @return Invisibly returns the result of writing the SDPA format file.
 //' @examples
 //' \donttest{
 //' A0 = matrix(c(-1,0,0,0,-2,1,0,1,-2), nrow=3, ncol=3, byrow = TRUE)
