@@ -15,5 +15,5 @@ external/lpSolve/src/liblp_solve.a:
 
 external/PackedCSparse/qd/libqd.a:
 	@(cd external/PackedCSparse/qd && $(MAKE) libqd.a \
-		CC="$(CC)" CPPFLAGS="$(CPPFLAGS)" CFLAGS="$(CFLAGS)" \
-		CPICFLAGS="$(CPICFLAGS)" AR="$(AR)")
+		CXX="$(CXX)" CPPFLAGS="$(CPPFLAGS)" CXXFLAGS="$(CXXFLAGS)" \
+		CXXPICFLAGS="$(CXXPICFLAGS)" AR="$(AR)")
